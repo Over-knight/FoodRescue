@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
+import { startProductCleanupJob } from './services/productCleanup';
 const app = express();
 
 dotenv.config();
@@ -146,6 +147,7 @@ async function startServer() {
     console.log('Starting FoodRescue API...');
     await DatabaseConnection.connect();
     
+    startProductCleanupJob();
     // await emailService.testConnection()
     // Connect to Redis (optional)
     //await RedisConnection.connect();

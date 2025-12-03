@@ -38,6 +38,7 @@ export interface IProduct extends Document {
     totalSold: number;
   };
 
+  expiryDate: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -197,6 +198,17 @@ const ProductSchema: Schema = new Schema({
       type: Number,
       default: 0,
       min: 0
+    }
+  },
+
+  expiryDate: {
+    type: Date,
+    required: [true, "Expiry date is required"],
+    validate: {
+      validator: function(value: Date) {
+        return value > new Date();
+      },
+      message: "Expiry date must be in the future"
     }
   }
 }, {
