@@ -8,6 +8,8 @@ export interface IProduct extends Document {
   description: string;
   images: string[];
   category: mongoose.Types.ObjectId;
+  restaurant: mongoose.Types.ObjectId;
+  visibleTo: 'consumer' | 'ngo' | 'both';
 
   pricing: {
     retail: {
@@ -38,9 +40,18 @@ export interface IProduct extends Document {
     totalSold: number;
   };
 
+  location?: {
+    address: string;
+    city: string;
+    coordinates?: { lat: number; lng: number; }
+  }
+
   expiryDate: Date;
   createdAt: Date;
   updatedAt: Date;
+  
+  updateStock(quantityOrdered: number, operation: 'decrease' | 'increase'): Promise<any>;
+  canFulfillOrder(quantity: number, orderType: 'retail' | 'bulk'): boolean;
 }
 
 const ProductSchema: Schema = new Schema({
@@ -73,6 +84,20 @@ const ProductSchema: Schema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
     required: [true, 'Product category is required']
+  },
+
+  restaurant: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',  // or 'Restaurant' if you create separate model
+    required: [true, 'Restaurant/seller is required'],
+    index: true
+  },
+
+  visibleTo: {
+    type: String,
+    enum: ['consumer', 'ngo', 'both'],
+    default: 'consumer',
+    required: true
   },
   
   pricing: {
@@ -209,7 +234,8 @@ const ProductSchema: Schema = new Schema({
         return value > new Date();
       },
       message: "Expiry date must be in the future"
-    }
+    },
+    index: true
   }
 }, {
   timestamps: true,
@@ -229,20 +255,33 @@ ProductSchema.virtual('isLowStock').get(function(this: IProduct) {
 
 
 // Validate hook
-ProductSchema.pre<IProduct>('validate', function(next) {
+ProductSchema.pre('validate', function() {
   // Generate slug
   if (this.isNew || this.isModified('name')) {
-    this.slug = this.name.toLowerCase().replace(/\s+/g, '-');
+    const name = (this as any).name;
+    // Convert to lowercase and replace spaces with hyphens
+    let slug = name.toLowerCase().trim();
+    slug = slug.split(' ').join('-');
+    // Remove special characters manually
+    let cleanSlug = '';
+    for (let i = 0; i < slug.length; i++) {
+      const char = slug[i];
+      if ((char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') || char === '-') {
+        cleanSlug += char;
+      }
+    }
+    (this as any).slug = cleanSlug;
   }
   
   // Auto-update status based on stock
-  if (this.inventory.availableStock <= 0) {
-    this.set('status', 'out_of_stock');
-  } else if (this.get('status') === 'out_of_stock' && this.inventory.availableStock > 0) {
-    this.set('status', 'active');
-  }
+  const availableStock = (this as any).inventory.availableStock;
+  const currentStatus = (this as any).get('status');
   
-  next();
+  if (availableStock <= 0) {
+    (this as any).set('status', 'out_of_stock');
+  } else if (currentStatus === 'out_of_stock' && availableStock > 0) {
+    (this as any).set('status', 'active');
+  }
 });
 
 // Method: Update stock when order is placed

@@ -10,6 +10,8 @@ export const startProductCleanupJob = () => {
             const result = await Product.deleteMany({
                 expiryDate: { $lte: oneDayFromNow}
             });
+
+            console.log(`[Product Cleanup] Deleted ${result.deletedCount} expired products`);
         } catch (error) {
             console.error("Product cleanup job failed: ", error)
         }

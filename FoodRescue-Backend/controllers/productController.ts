@@ -5,6 +5,7 @@ import { Deal } from '../models/deal';
 import { Category } from '../models/Category';
 import { validationResult } from 'express-validator';
 import { deleteMultipleImages } from '../utils/imageHelper';
+import mongoose from 'mongoose';
 
 
 
@@ -216,6 +217,129 @@ export const getProductBySlug = async (req: Request, res: Response): Promise<Res
   }
 };
 
+// GET /api/products/id/:id - Get product by MongoDB _id
+export const getProductById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    // Validate MongoDB ObjectId format using mongoose
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid product ID format'
+      });
+      return;
+    }
+
+    const product = await Product.findOne({
+      _id: id,
+      ...(req.user?.role !== 'admin' && { status: 'active' })
+    })
+    .populate('category', 'name slug description')
+    .select('-__v');
+
+    if (!product) {
+      res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+      return;
+    }
+
+    // Increment view count (don't await to avoid slowing response)
+    Product.findByIdAndUpdate(
+      product._id,
+      { $inc: { 'stats.viewCount': 1 } }
+    ).catch(err => console.error('Failed to increment view count:', err));
+
+    try {
+      const now = new Date();
+      const activeDeal = await Deal.findOne({
+        product: product._id,
+        status: { $in: ['active'] },
+        startAt: { $lte: now },
+        $or: [
+          { endAt: { $exists: false } },
+          { endAt: null },
+          { endAt: { $gte: now } }
+        ]
+      }).sort({ startAt: -1, createdAt: -1 });
+
+      if (activeDeal) {
+        const pObj: any = product.toObject();
+        pObj.dealId = String(activeDeal._id);
+        pObj.deal = String(activeDeal._id);
+        res.json({
+          success: true,
+          data: pObj
+        });
+        return;
+      }
+    } catch (dealErr) {
+      console.error('Error fetching active deal:', dealErr);
+    }
+
+    res.json({
+      success: true,
+      data: product
+    });
+  } catch (error) {
+    console.error('Get product by ID error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve product'
+    });
+  }
+};
+
+
+// POST /api/products/:id/view - Increment view count only
+export const incrementViewCount = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    // Validate MongoDB ObjectId format using mongoose
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid product ID format'
+      });
+      return;
+    }
+
+    const product = await Product.findOneAndUpdate(
+      {
+        _id: id,
+        status: 'active'
+      },
+      { $inc: { 'stats.viewCount': 1 } },
+      { new: true }
+    ).select('_id stats.viewCount');
+
+    if (!product) {
+      res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      message: 'View count updated',
+      data: {
+        viewCount: product.stats.viewCount
+      }
+    });
+  } catch (error) {
+    console.error('Increment view count error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update view count'
+    });
+  }
+};
+
 // GET /api/products/search - Search products
 export const searchProducts = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -267,7 +391,7 @@ export const searchProducts = async (req: Request, res: Response): Promise<void>
 
 // POST /api/products - Create product (admin only)
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
-   console.log('✅ CreateProduct function hit!');
+   console.log('CreateProduct function hit!');
   console.log('Files:', req.files);
   console.log('Body:', req.body);
   try {

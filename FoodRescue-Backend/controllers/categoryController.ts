@@ -5,6 +5,7 @@ import { validationResult } from 'express-validator';
 import { deleteImage } from '../utils/imageHelper';
 import multer from "multer";
 import { IUser } from '../models/user'
+import mongoose from 'mongoose';
 
 interface CustomRequest extends Request {
   file?: Express.Multer.File;
@@ -91,6 +92,58 @@ export const getCategoryBySlug = async (req: Request, res: Response): Promise<vo
   }
 };
 
+// GET /api/categories/id/:id - Get category by MongoDB _id
+export const getCategoryById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { includeProducts } = req.query;
+
+    // Validate MongoDB ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid category ID format'
+      });
+      return;
+    }
+
+    const category = await Category.findOne({
+      _id: id,
+      ...(req.user?.role !== 'admin' && { isActive: true })
+    });
+
+    if (!category) {
+      res.status(404).json({
+        success: false,
+        message: 'Category not found'
+      });
+      return;
+    }
+
+    let responseData: any = category.toObject();
+
+    if (includeProducts === 'true') {
+      const products = await Product.find({
+        category: category._id,
+        status: 'active'
+      }).select('name slug pricing.retail.price images status');
+
+      responseData.products = products;
+    }
+
+    res.json({
+      success: true,
+      data: responseData
+    });
+  } catch (error) {
+    console.error('Get category by ID error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch category'
+    });
+  }
+};
+
 //POST /api/admin/categories - create category (admin only)
 export const createCategory = async (req: Request, res: Response): Promise<void> => {
     try{
@@ -108,8 +161,9 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
 
         const image = req.file?.path
 
+        // Check for existing category without regex
         const existingCategory = await Category.findOne({
-            name: { $regex: new RegExp(`^${name}$`, 'i')}
+            name: name.trim()
         })
 
         if (existingCategory) {
@@ -183,9 +237,10 @@ export const updateCategory = async (req: Request, res: Response): Promise<void>
         }
 
         if (name && name !== category.name){
+            // Check for existing category without regex
             const existingCategory = await Category.findOne({
                 _id: { $ne: id },
-                name:  { $regex: new RegExp(`^${name}$`, 'i') }
+                name: name.trim()
             });
 
             if (existingCategory) {
@@ -203,8 +258,10 @@ export const updateCategory = async (req: Request, res: Response): Promise<void>
         if (isActive !== undefined) category.isActive = isActive;
 
         if (newImage) {
-          if (category.image) await deleteImage(category.image.toString());
-          category.image = newImage
+          if (category.image && category.image.length > 0) {
+            await deleteImage(category.image[0]);
+          }
+          category.image = [newImage];
         }
 
         await category.save()
@@ -258,8 +315,9 @@ export const deleteCategory = async (req: Request, res: Response): Promise<void>
       );
     }
 
-    if (category.image) {
-      await deleteImage(category.image.toString());
+    // Delete image if exists (image is string[] array)
+    if (category.image && category.image.length > 0) {
+      await deleteImage(category.image[0]);
     }
 
     await Category.findByIdAndDelete(id);

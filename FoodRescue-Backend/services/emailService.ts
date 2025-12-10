@@ -346,6 +346,152 @@ The FoodRescue Team
     }
   }
 
+  // Send pickup order confirmation email (with pickup code)
+  async sendPickupOrderConfirmation(email: string, orderData: {
+    orderNumber: string;
+    pickupCode: string;
+    items: Array<{ productName: string; quantity: number; unitPrice: number; subtotal: number }>;
+    totalAmount: number;
+    pickupLocation: { address: string; city: string };
+    scheduledPickupTime?: Date;
+  }): Promise<boolean> {
+    try {
+      const itemsList = orderData.items.map(item =>
+        `<tr>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;">${item.productName}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantity}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">₦${(item.unitPrice / 100).toFixed(2)}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">₦${(item.subtotal / 100).toFixed(2)}</td>
+        </tr>`
+      ).join('');
+
+      const pickupTimeSection = orderData.scheduledPickupTime ? `
+        <p><strong>Scheduled Pickup Time:</strong> ${new Date(orderData.scheduledPickupTime).toLocaleString()}</p>
+      ` : '';
+
+      const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .container { max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; }
+        .header { background-color: #28a745; color: white; padding: 20px; text-align: center; }
+        .content { padding: 30px 20px; }
+        .order-number { background-color: #f8f9fa; border: 2px solid #28a745; padding: 15px; font-size: 18px; font-weight: bold; text-align: center; margin: 20px 0; }
+        .pickup-code { background-color: #fff3cd; border: 3px solid #ffc107; padding: 20px; font-size: 32px; font-weight: bold; text-align: center; margin: 20px 0; letter-spacing: 5px; color: #856404; }
+        .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .items-table th { background-color: #f8f9fa; padding: 10px; text-align: left; border-bottom: 2px solid #ddd; }
+        .total-row { font-weight: bold; background-color: #f8f9fa; }
+        .info-box { background-color: #e7f3ff; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #007bff; }
+        .footer { background-color: #f8f9fa; padding: 15px; text-align: center; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Order Confirmed!</h1>
+        </div>
+        <div class="content">
+            <p>Thank you for your order! Your order has been confirmed and is being prepared.</p>
+
+            <div class="order-number">
+                Order Number: ${orderData.orderNumber}
+            </div>
+
+            <h3>🔐 Your Pickup Code</h3>
+            <p>Show this code when picking up your order:</p>
+            <div class="pickup-code">${orderData.pickupCode}</div>
+
+            <h3>📦 Order Summary</h3>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th style="text-align: center;">Quantity</th>
+                        <th style="text-align: right;">Unit Price</th>
+                        <th style="text-align: right;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${itemsList}
+                    <tr class="total-row">
+                        <td colspan="3" style="padding: 10px; text-align: right;">Total Amount:</td>
+                        <td style="padding: 10px; text-align: right;">₦${(orderData.totalAmount / 100).toFixed(2)}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <h4>📍 Pickup Location</h4>
+                <p>${orderData.pickupLocation.address}<br>${orderData.pickupLocation.city}</p>
+                ${pickupTimeSection}
+            </div>
+
+            <div class="info-box">
+                <h4>⚠️ Important</h4>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Please bring your pickup code: <strong>${orderData.pickupCode}</strong></li>
+                    <li>The seller will verify this code before handing over your order</li>
+                    <li>Order must be picked up within 24 hours</li>
+                </ul>
+            </div>
+
+            <p>If you have any questions, please don't hesitate to contact us.</p>
+
+            <p>Best regards,<br>The FoodRescue Team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; ${new Date().getFullYear()} FoodRescue. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+      `;
+
+      const text = `
+Order Confirmed!
+
+Thank you for your order! Your order has been confirmed and is being prepared.
+
+Order Number: ${orderData.orderNumber}
+
+PICKUP CODE: ${orderData.pickupCode}
+
+Order Summary:
+${orderData.items.map(item => `- ${item.productName} x${item.quantity}: ₦${(item.subtotal / 100).toFixed(2)}`).join('\n')}
+
+Total Amount: ₦${(orderData.totalAmount / 100).toFixed(2)}
+
+Pickup Location:
+${orderData.pickupLocation.address}
+${orderData.pickupLocation.city}
+${orderData.scheduledPickupTime ? `Scheduled Time: ${new Date(orderData.scheduledPickupTime).toLocaleString()}` : ''}
+
+IMPORTANT:
+- Please bring your pickup code: ${orderData.pickupCode}
+- The seller will verify this code before handing over your order
+- Order must be picked up within 24 hours
+
+Best regards,
+The FoodRescue Team
+      `;
+
+      const info = await this.getTransporter().sendMail({
+        from: process.env.EMAIL_FROM || `"FoodRescue" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: `Order Confirmed - Pickup Code: ${orderData.pickupCode}`,
+        text,
+        html,
+      });
+
+      console.log("Pickup order confirmation email sent:", info.messageId);
+      return true;
+    } catch (error) {
+      console.error("Error sending pickup order confirmation email:", error);
+      return false;
+    }
+  }
+
   // Send payment success email
   async sendPaymentSuccessEmail(email: string, data: {
     orderNumber: string;
@@ -440,4 +586,9 @@ The FoodRescue Team
 
 // Export singleton instance
 export const emailService = new EmailService();
+
+// Export individual functions for easier imports
+export const sendPickupOrderConfirmation = (email: string, orderData: any) => 
+  emailService.sendPickupOrderConfirmation(email, orderData);
+
 export default emailService;

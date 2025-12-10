@@ -2,7 +2,13 @@
   "name": "foodrescue-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/app.js",
+  "scripts": {
+    "dev": "nodemon src/app.ts",
+    "build": "rimraf dist && tsc",
+    "start": "node dist/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "accepts": "^2.0.0",
     "asn1.js": "^5.4.1",
@@ -60,6 +66,7 @@
     "minimalistic-assert": "^1.0.1",
     "mongodb": "^6.21.0",
     "mongodb-connection-string-url": "^3.0.2",
+    "mongoose": "^9.0.1",
     "morgan": "^1.10.1",
     "ms": "^2.0.0",
     "multer": "^2.0.2",
@@ -104,15 +111,16 @@
     "whatwg-url": "^14.2.0",
     "wrappy": "^1.0.2"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@types/express-session": "^1.18.2",
+    "@types/mongoose": "^5.11.96",
+    "@types/morgan": "^1.9.10",
     "@types/multer": "^2.0.0",
-    "@types/node-cron": "^3.0.11"
+    "@types/node-cron": "^3.0.11",
+    "rimraf": "^6.1.2"
   }
 }

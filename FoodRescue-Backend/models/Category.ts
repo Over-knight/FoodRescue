@@ -58,15 +58,22 @@ const CategorySchema: Schema = new Schema({
 
 CategorySchema.index({ isActive: 1 });
 
-CategorySchema.pre<ICategory>('save', function(next) {
+CategorySchema.pre('save', function() {
     if (this.isModified('name') || this.isNew) {
-        this.slug = this.name
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .trim();
+        // Generate slug from name
+        let slug = (this as any).name.toLowerCase().trim();
+        // Replace spaces with hyphens
+        slug = slug.split(' ').join('-');
+        // Remove special characters manually
+        let cleanSlug = '';
+        for (let i = 0; i < slug.length; i++) {
+            const char = slug[i];
+            if ((char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') || char === '-') {
+                cleanSlug += char;
+            }
+        }
+        (this as any).slug = cleanSlug;
     }
-    next();
 });
 
 CategorySchema.methods.updateProductCount = async function() {

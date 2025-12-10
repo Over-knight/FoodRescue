@@ -5,6 +5,10 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
+import authRoutes from './routes/authRoutes';
+import productRoutes from './routes/productRoutes';
+import categoryRoutes from './routes/categoryRoutes';
+import orderRoutes from './routes/orderRoutes';
 import { startProductCleanupJob } from './services/productCleanup';
 const app = express();
 
@@ -126,6 +130,12 @@ app.use((req, res) => {
     }
   });
 });
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Global error handler
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
