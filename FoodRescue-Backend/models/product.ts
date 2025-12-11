@@ -273,6 +273,18 @@ ProductSchema.pre('validate', function() {
     (this as any).slug = cleanSlug;
   }
   
+  // CRITICAL: Validate expiry date is not in the past
+  if (this.isModified('expiryDate')) {
+    const expiryDate = (this as any).expiryDate;
+    const now = new Date();
+    // Allow up to 1 hour in the past to account for timezone/clock drift
+    const oneHourAgo = new Date(now.getTime() - (60 * 60 * 1000));
+    
+    if (expiryDate && expiryDate < oneHourAgo) {
+      this.invalidate('expiryDate', 'Expiry date cannot be in the past.');
+    }
+  }
+  
   // Auto-update status based on stock
   const availableStock = (this as any).inventory.availableStock;
   const currentStatus = (this as any).get('status');

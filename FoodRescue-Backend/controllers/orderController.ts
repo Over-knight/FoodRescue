@@ -115,6 +115,59 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       });
     }
 
+    // CRITICAL FIX: Atomically deduct stock before creating order to prevent race conditions
+    // This ensures two users cannot order the same last item simultaneously
+    try {
+      for (const item of orderItems) {
+        const updatedProduct = await Product.findOneAndUpdate(
+          { 
+            _id: item.product, 
+            'inventory.availableStock': { $gte: item.quantity },
+            status: 'active'
+          },
+          { 
+            $inc: { 
+              'inventory.availableStock': -item.quantity,
+              'stats.orderCount': 1,
+              'stats.totalSold': item.quantity
+            }
+          },
+          { new: true }
+        );
+
+        if (!updatedProduct) {
+          // Stock ran out between validation and deduction - rollback previous deductions
+          const previousItems = orderItems.slice(0, orderItems.indexOf(item));
+          for (const prevItem of previousItems) {
+            await Product.findByIdAndUpdate(
+              prevItem.product,
+              { 
+                $inc: { 
+                  'inventory.availableStock': prevItem.quantity,
+                  'stats.orderCount': -1,
+                  'stats.totalSold': -prevItem.quantity
+                }
+              }
+            );
+          }
+          
+          const product = products.find(p => p._id.toString() === item.product.toString());
+          res.status(409).json({
+            success: false,
+            message: `Sorry, ${product?.name || 'this product'} is no longer available in the requested quantity.`
+          });
+          return;
+        }
+      }
+    } catch (stockError) {
+      console.error('Stock deduction error:', stockError);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to process order. Please try again.'
+      });
+      return;
+    }
+
     // Get pickup location from restaurant
     const restaurantProduct = products[0];
     const pickupLocation = restaurantProduct.location || {
@@ -122,7 +175,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       city: 'City'
     };
 
-    // Create order
+    // Create order (stock already deducted atomically above)
     const order = new Order({
       customer: customerId,
       restaurant: restaurantId,
@@ -135,14 +188,6 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     });
 
     await order.save();
-
-    // Update product stocks
-    for (const item of orderItems) {
-      const product = await Product.findById(item.product);
-      if (product) {
-        await product.updateStock(item.quantity, 'decrease');
-      }
-    }
 
     // Populate order details
     await order.populate('customer', 'firstName lastName email phone');
