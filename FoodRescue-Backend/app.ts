@@ -163,39 +163,57 @@ async function startServer() {
     console.log('Starting FoodRescue API...');
     await DatabaseConnection.connect();
     
-    // Start background cleanup jobs
-    startProductCleanupJob();
-    startOrderCleanupJob();
+    // Start background cleanup jobs only in non-serverless environment
+    // Vercel serverless functions don't support cron jobs
+    if (process.env.VERCEL !== '1') {
+      startProductCleanupJob();
+      startOrderCleanupJob();
+    }
     // await emailService.testConnection()
     // Connect to Redis (optional)
     //await RedisConnection.connect();
     
-    // Start Express server
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server running on port ${PORT}`);
-      //console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      //console.log(`Health check: http://localhost:${PORT}/health`);
-      //console.log(`API info: http://localhost:${PORT}/api`);
-    });
+    // Start Express server only if not running on Vercel
+    if (process.env.VERCEL !== '1') {
+      app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running on port ${PORT}`);
+        //console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+        //console.log(`Health check: http://localhost:${PORT}/health`);
+        //console.log(`API info: http://localhost:${PORT}/api`);
+      });
+    }
     
   } catch (error) {
     console.error('Failed to start server:', error);
-    process.exit(1);
+    if (process.env.VERCEL !== '1') {
+      process.exit(1);
+    }
   }
 }
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
-  process.exit(1);
+  if (process.env.VERCEL !== '1') {
+    process.exit(1);
+  }
 });
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
+  if (process.env.VERCEL !== '1') {
+    process.exit(1);
+  }
 });
 
-// Start the server
-startServer();
+// Connect to database for serverless
+if (process.env.VERCEL === '1') {
+  DatabaseConnection.connect().catch(console.error);
+}
+
+// Start the server (only in non-serverless environment)
+if (process.env.VERCEL !== '1') {
+  startServer();
+}
 
 export default app;
