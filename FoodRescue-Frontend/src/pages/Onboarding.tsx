@@ -11,7 +11,7 @@ const FOOD_CATEGORIES = [
 ];
 
 const MIN_BUDGET = 500;
-const MAX_BUDGET = 5000;
+const MAX_BUDGET = 20000; // Increased from 5000 to 20000
 
 export const Onboarding: React.FC = () => {
     const navigate = useNavigate();

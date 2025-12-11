@@ -93,11 +93,12 @@ body {
 /* Navbar */
 .navbar {
   background: white;
-  padding: 1rem 0;
+  padding: 1.25rem 0;
   position: sticky;
   top: 0;
   z-index: 50;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid #F3F4F6;
 }
 
 .nav-content {
@@ -114,18 +115,43 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  transition: transform 0.2s;
+}
+
+.logo:hover {
+  transform: scale(1.05);
 }
 
 .nav-links {
   display: flex;
   gap: 2rem;
+  align-items: center;
 }
 
 .nav-link {
   color: var(--text-muted);
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.2s;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  padding: 0.5rem 0;
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--primary);
+  transition: width 0.2s;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
 }
 
 .nav-link:hover,

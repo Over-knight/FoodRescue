@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { MOCK_USERS } from '../services/mockData';
-import { authAPI } from '../services/api';
+import { authService } from '../services/authService';
 
 interface AuthContextType {
     user: User | null;
@@ -26,31 +26,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check local storage on load
-        const savedUser = localStorage.getItem('food_rescue_user');
-        const token = localStorage.getItem('token');
-
-        if (savedUser) {
-            setUser(JSON.parse(savedUser));
-        } else if (token) {
-            // If we have a token but no saved user, fetch user from API
-            fetchCurrentUser();
+        // Check if user is authenticated
+        const currentUser = authService.getCurrentUser();
+        if (currentUser) {
+            setUser(currentUser);
         }
         setLoading(false);
     }, []);
-
-    const fetchCurrentUser = async () => {
-        try {
-            const response = await authAPI.getCurrentUser();
-            if (response.success) {
-                setUser(response.data);
-                localStorage.setItem('food_rescue_user', JSON.stringify(response.data));
-            }
-        } catch (error) {
-            console.error('Failed to fetch user:', error);
-            authAPI.logout();
-        }
-    };
 
     // Demo login (for quick testing)
     const login = (role: 'consumer' | 'restaurant' | 'grocery' | 'ngo' | 'admin') => {
@@ -64,19 +46,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Real login with credentials
     const loginWithCredentials = async (email: string, password: string) => {
         try {
-            const response = await authAPI.login(email, password);
-            if (response.success) {
-                setUser(response.user);
-                localStorage.setItem('food_rescue_user', JSON.stringify(response.user));
-            }
+            const response = await authService.login({ email, password });
+            setUser(response.user as User);
         } catch (error: any) {
-            throw new Error(error.response?.data?.error || 'Login failed');
+            throw new Error(error.message || 'Login failed');
         }
     };
 
     const logout = () => {
         setUser(null);
-        authAPI.logout();
+        authService.logout();
     };
 
     return (

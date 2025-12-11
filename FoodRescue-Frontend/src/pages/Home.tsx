@@ -1,21 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { getActiveFoods, MOCK_USERS } from '../services/mockData';
-import { smartMatchFoods } from '../services/aiService';
+import { foodService } from '../services/foodService';
 import { Food } from '../types';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export const Home: React.FC = () => {
     const [foods, setFoods] = useState<Food[]>([]);
     const [filter, setFilter] = useState<'all' | 'meals' | 'groceries'>('all');
-    const user = MOCK_USERS[0]; // Simulate logged-in user
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const { user } = useAuth();
 
     useEffect(() => {
-        // Simulate API fetch
-        const allFoods = getActiveFoods();
-        // Apply AI Matching
-        const matchedFoods = smartMatchFoods(user, allFoods);
-        setFoods(matchedFoods);
-    }, [user]);
+        const fetchFoods = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const data = await foodService.getAllFoods();
+                setFoods(data);
+            } catch (err: any) {
+                console.error('Error fetching foods:', err);
+                setError('Failed to load food items. Please try again later.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchFoods();
+    }, []);
 
     return (
         <div>
@@ -98,10 +110,37 @@ export const Home: React.FC = () => {
                 color: 'white'
             }}>
                 <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem' }}>Top Picks For You</h2>
-                <p style={{ margin: 0, opacity: 0.9 }}>Based on your love for Rice, Pastry</p>
+                <p style={{ margin: 0, opacity: 0.9 }}>Fresh deals from local vendors</p>
             </div>
 
+            {/* Loading State */}
+            {loading && (
+                <div style={{ textAlign: 'center', padding: '3rem' }}>
+                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔄</div>
+                    <p style={{ color: 'var(--text-muted)' }}>Loading delicious deals...</p>
+                </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+                <div style={{
+                    background: '#FEE2E2',
+                    border: '1px solid #EF4444',
+                    borderRadius: '0.75rem',
+                    padding: '1.5rem',
+                    textAlign: 'center'
+                }}>
+                    <p style={{ color: '#EF4444', margin: 0 }}>{error}</p>
+                </div>
+            )}
+
             {/* Food Cards - Horizontal Layout */}
+            {!loading && !error && foods.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '3rem' }}>
+                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🍽️</div>
+                    <p style={{ color: 'var(--text-muted)' }}>No food items available at the moment.</p>
+                </div>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {foods
                     .filter(food => {

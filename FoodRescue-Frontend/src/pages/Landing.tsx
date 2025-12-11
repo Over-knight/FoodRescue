@@ -32,16 +32,6 @@ export const Landing: React.FC = () => {
                 }}></div>
 
                 <div className="container" style={{ position: 'relative', zIndex: 10 }}>
-                    <span style={{
-                        background: 'rgba(255,255,255,0.2)',
-                        padding: '0.5rem 1rem',
-                        borderRadius: '2rem',
-                        fontSize: '0.9rem',
-                        backdropFilter: 'blur(4px)',
-                        border: '1px solid rgba(255,255,255,0.3)'
-                    }}>
-                        🌍 Saving Lagos, one meal at a time
-                    </span>
                     <h1 style={{
                         fontSize: 'clamp(3rem, 6vw, 5rem)',
                         fontWeight: 800,
@@ -148,7 +138,7 @@ export const Landing: React.FC = () => {
                                 <li style={{ display: 'flex', gap: '1rem' }}>✅ Reach new local customers</li>
                                 <li style={{ display: 'flex', gap: '1rem' }}>✅ Enhance your green reputation</li>
                             </ul>
-                            <Link to="/signup" className="btn" style={{ background: 'white', color: '#10B981', width: '100%', marginTop: '2rem' }}>Start Selling Today</Link>
+                            <Link to="/signup" className="btn" style={{ background: 'white', color: '#10B981', width: '100%', marginTop: '2rem', textAlign: 'center', display: 'block' }}>Start Selling Today</Link>
                         </div>
                     </div>
                 </div>
