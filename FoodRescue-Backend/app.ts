@@ -13,6 +13,7 @@ import analyticsRoutes from './routes/analyticsRoutes';
 import adminRoutes from './routes/adminRoutes';
 import dealRoutes from './routes/dealRoutes';
 import { startProductCleanupJob } from './services/productCleanup';
+import { startOrderCleanupJob } from './services/orderCleanup';
 const app = express();
 
 dotenv.config();
@@ -162,7 +163,9 @@ async function startServer() {
     console.log('Starting FoodRescue API...');
     await DatabaseConnection.connect();
     
+    // Start background cleanup jobs
     startProductCleanupJob();
+    startOrderCleanupJob();
     // await emailService.testConnection()
     // Connect to Redis (optional)
     //await RedisConnection.connect();
