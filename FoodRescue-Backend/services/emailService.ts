@@ -188,12 +188,12 @@ class EmailService {
         html: template.html,
       });
 
-      console.log("✅ Verification email sent successfully!");
+      console.log("Verification email sent successfully!");
       console.log("Message ID:", info.messageId);
       console.log("Response:", info.response);
       return true;
     } catch (error: any) {
-      console.error("❌ Error sending verification email:");
+      console.error(" Error sending verification email:");
       console.error("Error message:", error.message);
       console.error("Error code:", error.code);
       console.error("Full error:", error);

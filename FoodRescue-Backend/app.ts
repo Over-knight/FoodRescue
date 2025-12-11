@@ -61,9 +61,11 @@ if (process.env.NODE_ENV !== 'production') {
   });
 } else {
   app.use(cors({
-    origin: [ 'http://localhost:5173',
+    origin: [
+      'http://localhost:5173',
       'http://localhost:5000',
-      'http://localhost:3000'
+      'http://localhost:3000',
+      /\.vercel\.app$/  // Allow any Vercel deployed frontend
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

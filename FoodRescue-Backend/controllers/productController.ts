@@ -427,14 +427,23 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       status = 'draft'
     } = req.body;
 
-     if (typeof pricing === 'string') {
-      pricing = JSON.parse(pricing);
-    }
-    if (typeof inventory === 'string') {
-      inventory = JSON.parse(inventory);
-    }
-    if (typeof tags === 'string') {
-      tags = JSON.parse(tags);
+    // Parse JSON strings from form-data with safety wrapper
+    try {
+      if (typeof pricing === 'string') {
+        pricing = JSON.parse(pricing);
+      }
+      if (typeof inventory === 'string') {
+        inventory = JSON.parse(inventory);
+      }
+      if (typeof tags === 'string') {
+        tags = JSON.parse(tags);
+      }
+    } catch (e) {
+      res.status(400).json({ 
+        success: false, 
+        message: 'Invalid JSON format in form data (pricing, inventory, or tags)' 
+      });
+      return;
     }
       
     
