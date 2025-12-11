@@ -58,6 +58,73 @@ export const login = async (
 };
 
 
+// Direct signup without email verification (for development/testing)
+export const directSignup = async (
+  req: Request,
+  res: Response<AuthResponse>
+): Promise<Response<AuthResponse>> => {
+  try {
+    const { name, email, password, role, phone, location } = req.body;
+
+    // Validate required fields
+    if (!email || !password || !name) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, and password are required"
+      });
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Account with this email already exists"
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create new user
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      firstName: name.split(' ')[0] || name,
+      lastName: name.split(' ').slice(1).join(' ') || '',
+      role: role || 'customer',
+      phone: phone || undefined,
+      profile: {
+        isVerified: true, // Auto-verify for now
+        address: location?.address || undefined
+      },
+      isActive: true
+    });
+
+    await newUser.save();
+
+    // Generate token
+    const token = generateToken(String(newUser._id), newUser.role);
+
+    // Remove password from response
+    const userResponse = newUser.toObject();
+    delete userResponse.password;
+
+    return res.status(201).json({
+      success: true,
+      message: "Account created successfully",
+      data: { user: userResponse as any, token }
+    });
+  } catch (error) {
+    console.error("Direct signup error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error during signup"
+    });
+  }
+};
+
+
 export const getProfile = async (
   req: Request,
   res: Response<ProfileResponse>

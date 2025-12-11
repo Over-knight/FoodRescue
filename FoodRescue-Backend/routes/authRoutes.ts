@@ -7,6 +7,7 @@ import {
   resetPassword,
   getProfile,
   updateProfile,
+  directSignup,
   sendVerificationEmail,
   verifyEmailAndRegister,
   resendVerificationEmail
@@ -35,8 +36,11 @@ router.get('/profile', authenticateToken, getProfile);
 // PUT /api/auth/profile - Update user profile
 router.put('/profile', authenticateToken, updateProfile);
 
-// POST /api/auth/signup
-router.post('/signup', sendVerificationEmail);
+// POST /api/auth/signup - Direct signup (no email verification for now)
+router.post('/signup', directSignup);
+
+// POST /api/auth/signup/verify - Email verification flow (optional)
+router.post('/signup/verify', sendVerificationEmail);
 
 // POST /api/auth/signup/complete
 router.post('/signup/complete', verifyEmailAndRegister);
