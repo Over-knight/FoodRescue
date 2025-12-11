@@ -168,6 +168,16 @@ class EmailService {
   // Send verification email
   async sendVerificationEmail(email: string, verificationCode: string): Promise<boolean> {
     try {
+      console.log('=== EMAIL SERVICE DEBUG ===');
+      console.log('Attempting to send verification email to:', email);
+      console.log('Email configuration:', {
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        user: process.env.EMAIL_USER,
+        hasPassword: !!process.env.EMAIL_PASS,
+        from: process.env.EMAIL_FROM
+      });
+
       const template = createVerificationEmailTemplate(verificationCode);
       
       const info = await this.getTransporter().sendMail({
@@ -178,10 +188,15 @@ class EmailService {
         html: template.html,
       });
 
-      console.log("Verification email sent:", info.messageId);
+      console.log("✅ Verification email sent successfully!");
+      console.log("Message ID:", info.messageId);
+      console.log("Response:", info.response);
       return true;
-    } catch (error) {
-      console.error("Error sending verification email:", error);
+    } catch (error: any) {
+      console.error("❌ Error sending verification email:");
+      console.error("Error message:", error.message);
+      console.error("Error code:", error.code);
+      console.error("Full error:", error);
       return false;
     }
   }
