@@ -1,0 +1,905 @@
+// src/controllers/productController.ts
+import { Request, Response } from 'express';
+import { Product, IProduct } from '../models/product';
+import { Deal } from '../models/deal';
+import { Category } from '../models/Category';
+import { validationResult } from 'express-validator';
+import { deleteMultipleImages } from '../utils/imageHelper';
+import mongoose from 'mongoose';
+
+
+
+// VALIDATION HELPER
+const validateProductImages = (images: string[] | undefined): { valid: boolean; message?: string } => {
+  if (!images) return { valid: true }; // Images are optional
+  
+  if (!Array.isArray(images)) {
+    return { valid: false, message: 'Images must be an array' };
+  }
+  
+  if (images.length > 5) {
+    return { valid: false, message: 'Maximum 5 images allowed' };
+  }
+  
+  // Check file extensions (assuming URLs end with file extensions)
+  const validExtensions = ['.jpg', '.jpeg', '.png', '.JPG', '.JPEG', '.PNG'];
+  for (const image of images) {
+    if (typeof image !== 'string') {
+      return { valid: false, message: 'Image URLs must be strings' };
+    }
+    
+    const hasValidExtension = validExtensions.some(ext => image.endsWith(ext));
+    if (!hasValidExtension) {
+      return { valid: false, message: 'Only JPG and PNG images are allowed' };
+    }
+  }
+  
+  return { valid: true };
+};
+
+// GET /api/products - List products with filters
+export const getProducts = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      category,
+      status,
+      search,
+      minPrice,
+      maxPrice,
+      tags,
+      sort = 'createdAt',
+      order = 'desc',
+      page = 1,
+      limit = 20
+    } = req.query;
+
+    // Build filter object
+    const filter: any = {};
+
+    // Only show active products for non-admin users
+    if (req.user?.role !== 'admin') {
+      filter.status = 'active';
+    } else if (status) {
+      filter.status = status;
+    }
+
+    // Category filter
+    if (category) {
+      const categoryDoc = await Category.findOne({ slug: category });
+      if (categoryDoc) {
+        filter.category = categoryDoc._id;
+      }
+    }
+
+    // Price range filter (using retail price)
+    if (minPrice || maxPrice) {
+      filter['pricing.retail.price'] = {};
+      if (minPrice) filter['pricing.retail.price'].$gte = Number(minPrice) * 100; // Convert to kobo
+      if (maxPrice) filter['pricing.retail.price'].$lte = Number(maxPrice) * 100;
+    }
+
+    // Tags filter
+    if (tags) {
+      const tagArray = Array.isArray(tags) ? tags : [tags];
+      filter.tags = { $in: tagArray };
+    }
+
+    // Search filter
+    if (search) {
+      filter.$text = { $search: search as string };
+    }
+
+    // Pagination
+    const pageNum = Math.max(1, Number(page));
+    const limitNum = Math.max(1, Math.min(50, Number(limit))); // Max 50 items per page
+    const skip = (pageNum - 1) * limitNum;
+
+    // Sort options
+    const sortOptions: any = {};
+    const validSorts = ['createdAt', 'name', 'pricing.retail.price', 'stats.viewCount', 'stats.orderCount'];
+    const sortField = validSorts.includes(sort as string) ? (sort as string) : 'createdAt';
+    sortOptions[sortField] = order === 'asc' ? 1 : -1;
+
+    // Execute query with population
+    const products = await Product.find(filter)
+      .populate('category', 'name slug')
+      .select('-__v')
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limitNum)
+      .lean();
+
+    // Attach active deal id to each product if available (helps clients include dealId when adding to cart)
+    const now = new Date();
+    await Promise.all(products.map(async (product: any) => {
+      try {
+        const activeDeal = await Deal.findOne({
+          product: product._id,
+          status: { $in: ['active'] },
+          startAt: { $lte: now },
+          $or: [ { endAt: { $exists: false } }, { endAt: null }, { endAt: { $gte: now } } ]
+        }).sort({ startAt: -1, createdAt: -1 });
+
+        if (activeDeal) {
+          product.dealId = String(activeDeal._id);
+          product.deal = String(activeDeal._id);
+        }
+      } catch (e) {
+        console.error('Error attaching active deal to product list item:', e);
+      }
+    }));
+
+    // Get total count for pagination
+    const totalProducts = await Product.countDocuments(filter);
+    const totalPages = Math.ceil(totalProducts / limitNum);
+
+    res.json({
+      success: true,
+      data: {
+        products,
+        pagination: {
+          currentPage: pageNum,
+          totalPages,
+          totalProducts,
+          hasNextPage: pageNum < totalPages,
+          hasPrevPage: pageNum > 1
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get products error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch products'
+    });
+  }
+};
+
+// GET /api/products/:slug - Get single product
+export const getProductBySlug = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { slug } = req.params;
+
+    const product = await Product.findOne({
+      slug,
+      ...(req.user?.role !== 'admin' && { status: 'active' })
+    })
+    .populate('category', 'name slug description')
+    .select('-__v');
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+
+    // Increment view count (don't await to avoid slowing response)
+    Product.findByIdAndUpdate(
+      product._id,
+      { $inc: { 'stats.viewCount': 1 } }
+    ).catch(err => console.error('Failed to increment view count:', err));
+
+    // Attach active deal id if product is part of an active deal
+    try {
+      const now2 = new Date();
+      const activeDeal = await Deal.findOne({
+        product: product._id,
+        status: { $in: ['active'] },
+        startAt: { $lte: now2 },
+        $or: [ { endAt: { $exists: false } }, { endAt: null }, { endAt: { $gte: now2 } } ]
+      }).sort({ startAt: -1, createdAt: -1 });
+
+      if (activeDeal) {
+        // product is a mongoose document - convert to object for mutation consistency
+        const pObj: any = typeof product.toObject === 'function' ? product.toObject() : product;
+        pObj.dealId = String(activeDeal._id);
+        pObj.deal = String(activeDeal._id);
+        return res.json({
+          success: true,
+          data: pObj
+        });
+      }
+    } catch (e) {
+      console.error('Error attaching active deal to product by slug:', e);
+    }
+
+    return res.json({
+      success: true,
+      data: product
+    });
+  } catch (error) {
+    console.error('Get product by slug error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch product'
+    });
+  }
+};
+
+// GET /api/products/id/:id - Get product by MongoDB _id
+export const getProductById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    // Validate MongoDB ObjectId format using mongoose
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid product ID format'
+      });
+      return;
+    }
+
+    const product = await Product.findOne({
+      _id: id,
+      ...(req.user?.role !== 'admin' && { status: 'active' })
+    })
+    .populate('category', 'name slug description')
+    .select('-__v');
+
+    if (!product) {
+      res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+      return;
+    }
+
+    // Increment view count (don't await to avoid slowing response)
+    Product.findByIdAndUpdate(
+      product._id,
+      { $inc: { 'stats.viewCount': 1 } }
+    ).catch(err => console.error('Failed to increment view count:', err));
+
+    try {
+      const now = new Date();
+      const activeDeal = await Deal.findOne({
+        product: product._id,
+        status: { $in: ['active'] },
+        startAt: { $lte: now },
+        $or: [
+          { endAt: { $exists: false } },
+          { endAt: null },
+          { endAt: { $gte: now } }
+        ]
+      }).sort({ startAt: -1, createdAt: -1 });
+
+      if (activeDeal) {
+        const pObj: any = product.toObject();
+        pObj.dealId = String(activeDeal._id);
+        pObj.deal = String(activeDeal._id);
+        res.json({
+          success: true,
+          data: pObj
+        });
+        return;
+      }
+    } catch (dealErr) {
+      console.error('Error fetching active deal:', dealErr);
+    }
+
+    res.json({
+      success: true,
+      data: product
+    });
+  } catch (error) {
+    console.error('Get product by ID error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve product'
+    });
+  }
+};
+
+
+// POST /api/products/:id/view - Increment view count only
+export const incrementViewCount = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    // Validate MongoDB ObjectId format using mongoose
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid product ID format'
+      });
+      return;
+    }
+
+    const product = await Product.findOneAndUpdate(
+      {
+        _id: id,
+        status: 'active'
+      },
+      { $inc: { 'stats.viewCount': 1 } },
+      { new: true }
+    ).select('_id stats.viewCount');
+
+    if (!product) {
+      res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      message: 'View count updated',
+      data: {
+        viewCount: product.stats.viewCount
+      }
+    });
+  } catch (error) {
+    console.error('Increment view count error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update view count'
+    });
+  }
+};
+
+// GET /api/products/search - Search products
+export const searchProducts = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { q, category, limit = 10 } = req.query;
+
+    if (!q || typeof q !== 'string') {
+      res.status(400).json({
+        success: false,
+        message: 'Search query is required'
+      });
+      return;
+    }
+
+    const filter: any = {
+      $text: { $search: q },
+      ...(req.user?.role !== 'admin' && { status: 'active' })
+    };
+
+    // Category filter
+    if (category) {
+      const categoryDoc = await Category.findOne({ slug: category });
+      if (categoryDoc) {
+        filter.category = categoryDoc._id;
+      }
+    }
+
+    const products = await Product.find(filter)
+      .populate('category', 'name slug')
+      .select('name slug pricing.retail.price images category tags')
+      .sort({ score: { $meta: 'textScore' } })
+      .limit(Math.min(50, Number(limit)));
+
+    res.json({
+      success: true,
+      data: {
+        products,
+        count: products.length,
+        query: q
+      }
+    });
+  } catch (error) {
+    console.error('Search products error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Search failed'
+    });
+  }
+};
+
+// POST /api/products - Create product (admin only)
+export const createProduct = async (req: Request, res: Response): Promise<void> => {
+   console.log('CreateProduct function hit!');
+  console.log('Files:', req.files);
+  console.log('Body:', req.body);
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+      return;
+    }
+
+    const uploadedImages = req.files as Express.Multer.File[];
+    const images = uploadedImages?.map(file => file.path) || [];
+
+    if (images.length === 0){
+      res.status(400).json({
+      success: false,
+      message: 'At least one product image is required'
+      })
+      return;
+    }
+
+    let {
+      name,
+      description,
+      category,
+      pricing,
+      inventory,
+      tags,
+      status = 'draft'
+    } = req.body;
+
+     if (typeof pricing === 'string') {
+      pricing = JSON.parse(pricing);
+    }
+    if (typeof inventory === 'string') {
+      inventory = JSON.parse(inventory);
+    }
+    if (typeof tags === 'string') {
+      tags = JSON.parse(tags);
+    }
+      
+    
+    //Image validation
+    const imageValidation = validateProductImages(images);
+    if (!imageValidation.valid) {
+
+      if (images.length > 0) await deleteMultipleImages(images);
+      res.status(400).json({
+        success: false,
+        message: imageValidation.message
+      });
+      return;
+    }
+    
+    // Verify category exists
+    const categoryDoc = await Category.findById(category);
+    if (!categoryDoc) {
+
+      if (images.length > 0) await deleteMultipleImages
+      res.status(400).json({
+        success: false,
+        message: 'Invalid category ID'
+      });
+      return;
+    }
+
+    // Check if product name already exists
+    const existingProduct = await Product.findOne({
+      name: { $regex: new RegExp(`^${name}$`, 'i') }
+    });
+
+    if (existingProduct) {
+
+      if (images.length > 0) await deleteMultipleImages(images);
+      res.status(409).json({
+        success: false,
+        message: 'Product with this name already exists'
+      });
+      return;
+    }
+
+    const product = new Product({
+      name: name.trim(),
+      description: description?.trim(),
+      images: images,
+      category,
+      pricing,
+      inventory,
+      tags: tags || [],
+      status
+    });
+
+    await product.save();
+
+    // Update category product count
+    await Category.findByIdAndUpdate(
+      category,
+      { $inc: { productCount: 1 } }
+    );
+
+    // Populate category for response
+    await product.populate('category', 'name slug');
+
+    res.status(201).json({
+      success: true,
+      message: 'Product created successfully',
+      data: product
+    });
+  } catch (error) {
+
+    const uploadedImages = req.files as Express.Multer.File[];
+    if (uploadedImages.length > 0) {
+      await deleteMultipleImages(uploadedImages.map(f => f.path))
+    }
+    console.error('Create product error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create product'
+    });
+  }
+};
+
+// PUT /api/products/:id - Update product (admin only)
+export const updateProduct = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+      return;
+    }
+
+    const { id } = req.params;
+    const {
+      name,
+      description,
+      images,
+      category,
+      pricing,
+      inventory,
+      tags,
+      status
+    } = req.body;
+
+     // IMAGE VALIDATION HERE
+    if (images !== undefined) {
+      const imageValidation = validateProductImages(images);
+      if (!imageValidation.valid) {
+        res.status(400).json({
+          success: false,
+          message: imageValidation.message
+        });
+        return;
+      }
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+      res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+      return;
+    }
+
+    // Check if new name conflicts with existing product
+    if (name && name !== product.name) {
+      const existingProduct = await Product.findOne({
+        _id: { $ne: id },
+        name: { $regex: new RegExp(`^${name}$`, 'i') }
+      });
+
+      if (existingProduct) {
+        res.status(409).json({
+          success: false,
+          message: 'Product with this name already exists'
+        });
+        return;
+      }
+    }
+
+    // Verify new category if provided
+    if (category && category !== product.category?.toString()) {
+      const categoryDoc = await Category.findById(category);
+      if (!categoryDoc) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid category ID'
+        });
+        return;
+      }
+
+      // Update product counts
+      if (product.category) {
+        await Category.findByIdAndUpdate(
+          product.category,
+          { $inc: { productCount: -1 } }
+        );
+      }
+      await Category.findByIdAndUpdate(
+        category,
+        { $inc: { productCount: 1 } }
+      );
+    }
+
+    // Update fields
+    if (name) product.name = name.trim();
+    if (description !== undefined) product.description = description?.trim();
+    if (images) product.images = images;
+    if (category) product.category = category;
+    if (pricing) product.pricing = pricing;
+    if (inventory) product.inventory = inventory;
+    if (tags) product.tags = tags;
+    if (status) product.status = status;
+
+    await product.save();
+    await product.populate('category', 'name slug');
+
+    res.json({
+      success: true,
+      message: 'Product updated successfully',
+      data: product
+    });
+  } catch (error) {
+    console.error('Update product error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update product'
+    });
+  }
+};
+
+// DELETE /api/products/:id - Delete product (admin only)
+export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const product = await Product.findById(id);
+    if (!product) {
+      res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+      return;
+    }
+
+    // Update category product count
+    if (product.category) {
+      await Category.findByIdAndUpdate(
+        product.category,
+        { $inc: { productCount: -1 } }
+      );
+    }
+
+    await Product.findByIdAndDelete(id);
+
+    res.json({
+      success: true,
+      message: 'Product deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete product error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete product'
+    });
+  }
+};
+
+// GET /api/admin/products/stats - Get product statistics (admin only)
+export const getProductStats = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const totalProducts = await Product.countDocuments();
+    const activeProducts = await Product.countDocuments({ status: 'active' });
+    const inactiveProducts = await Product.countDocuments({ status: 'inactive' });
+    const outOfStockProducts = await Product.countDocuments({ status: 'out_of_stock' });
+
+    // Low stock products
+    const lowStockProducts = await Product.find({
+      $expr: {
+        $lte: ['$inventory.availableStock', '$inventory.lowStockThreshold']
+      },
+      status: 'active'
+    }).select('name inventory.availableStock inventory.lowStockThreshold');
+
+    // Most viewed products
+    const mostViewed = await Product.find({ status: 'active' })
+      .populate('category', 'name')
+      .select('name stats.viewCount category')
+      .sort({ 'stats.viewCount': -1 })
+      .limit(10);
+
+    // Most ordered products
+    const mostOrdered = await Product.find({ status: 'active' })
+      .populate('category', 'name')
+      .select('name stats.orderCount category')
+      .sort({ 'stats.orderCount': -1 })
+      .limit(10);
+
+    res.json({
+      success: true,
+      data: {
+        summary: {
+          total: totalProducts,
+          active: activeProducts,
+          inactive: inactiveProducts,
+          outOfStock: outOfStockProducts,
+          lowStock: lowStockProducts.length
+        },
+        lowStockProducts,
+        mostViewed,
+        mostOrdered
+      }
+    });
+  } catch (error) {
+    console.error('Get product stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch product statistics'
+    });
+  }
+};
+
+// GET /api/admin/products/inventory - Get inventory tracking overview (admin only)
+export const getInventoryTracking = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { filter = 'all', sort = 'name', order = 'asc' } = req.query;
+
+    // Build filter query
+    const query: any = {};
+
+    if (filter === 'low_stock') {
+      query.$expr = {
+        $lte: ['$inventory.availableStock', '$inventory.lowStockThreshold']
+      };
+      query.status = { $ne: 'out_of_stock' };
+    } else if (filter === 'out_of_stock') {
+      query.status = 'out_of_stock';
+    } else if (filter === 'active') {
+      query.status = 'active';
+    } else if (filter === 'critical') {
+      // Critical: stock is 0 OR less than half of threshold
+      query.$or = [
+        { 'inventory.availableStock': 0 },
+        {
+          $expr: {
+            $lte: [
+              '$inventory.availableStock',
+              { $divide: ['$inventory.lowStockThreshold', 2] }
+            ]
+          }
+        }
+      ];
+    }
+
+    // Sort options
+    const sortOptions: any = {};
+    const validSorts = ['name', 'inventory.availableStock', 'stats.orderCount'];
+    const sortField = validSorts.includes(sort as string) ? (sort as string) : 'name';
+    sortOptions[sortField] = order === 'asc' ? 1 : -1;
+
+    const products = await Product.find(query)
+      .populate('category', 'name slug')
+      .select('name images inventory status stats category')
+      .sort(sortOptions);
+
+    // Calculate inventory metrics
+    const totalValue = products.reduce((sum, p) => {
+      return sum + (p.inventory.availableStock * (p.pricing?.retail?.price || 0));
+    }, 0);
+
+    const lowStockCount = products.filter(p => 
+      p.inventory.availableStock <= p.inventory.lowStockThreshold && 
+      p.status !== 'out_of_stock'
+    ).length;
+
+    const criticalStockCount = products.filter(p => 
+      p.inventory.availableStock === 0 || 
+      p.inventory.availableStock <= (p.inventory.lowStockThreshold / 2)
+    ).length;
+
+    res.json({
+      success: true,
+      data: {
+        products: products.map(p => ({
+          _id: p._id,
+          name: p.name,
+          image: p.images[0] || null,
+          category: p.category,
+          availableStock: p.inventory.availableStock,
+          lowStockThreshold: p.inventory.lowStockThreshold,
+          unit: p.inventory.unit,
+          status: p.status,
+          isLowStock: p.inventory.availableStock <= p.inventory.lowStockThreshold,
+          isCritical: p.inventory.availableStock === 0 || 
+                     p.inventory.availableStock <= (p.inventory.lowStockThreshold / 2),
+          stockPercentage: Math.round(
+            (p.inventory.availableStock / Math.max(p.inventory.lowStockThreshold * 2, 1)) * 100
+          ),
+          totalOrders: p.stats.orderCount,
+          totalSold: p.stats.totalSold
+        })),
+        metrics: {
+          totalProducts: products.length,
+          lowStockCount,
+          criticalStockCount,
+          outOfStockCount: products.filter(p => p.status === 'out_of_stock').length,
+          totalInventoryValue: totalValue
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get inventory tracking error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch inventory tracking data'
+    });
+  }
+};
+
+// PATCH /api/admin/products/:id/stock - Update product stock (admin only)
+export const updateProductStock = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { availableStock, lowStockThreshold, operation, quantity } = req.body;
+
+    const product = await Product.findById(id);
+    if (!product) {
+      res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+      return;
+    }
+
+    // Handle stock operations (increase/decrease)
+    if (operation && quantity !== undefined) {
+      if (!['increase', 'decrease'].includes(operation)) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid operation. Must be "increase" or "decrease"'
+        });
+        return;
+      }
+
+      if (quantity < 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Quantity must be positive'
+        });
+        return;
+      }
+
+      if (operation === 'increase') {
+        product.inventory.availableStock += quantity;
+      } else {
+        product.inventory.availableStock = Math.max(0, product.inventory.availableStock - quantity);
+      }
+    } 
+    // Handle direct stock update
+    else if (availableStock !== undefined) {
+      if (availableStock < 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Stock cannot be negative'
+        });
+        return;
+      }
+      product.inventory.availableStock = availableStock;
+    }
+
+    // Update low stock threshold if provided
+    if (lowStockThreshold !== undefined) {
+      if (lowStockThreshold < 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Low stock threshold cannot be negative'
+        });
+        return;
+      }
+      product.inventory.lowStockThreshold = lowStockThreshold;
+    }
+
+    await product.save();
+
+    res.json({
+      success: true,
+      message: 'Stock updated successfully',
+      data: {
+        product: {
+          _id: product._id,
+          name: product.name,
+          inventory: product.inventory,
+          status: product.status
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Update product stock error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update stock'
+    });
+  }
+};
