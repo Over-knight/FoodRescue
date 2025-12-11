@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { authService } from '../services/authService';
 
 export const Signup: React.FC = () => {
     const { login } = useAuth();
@@ -16,17 +17,41 @@ export const Signup: React.FC = () => {
         contactPerson: '',
         address: '',
     });
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleSignup = (e: React.FormEvent) => {
+    const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Simulate signup -> login
-        login(role);
-        if (role === 'restaurant' || role === 'grocery') {
-            navigate('/dashboard');
-        } else if (role === 'consumer') {
-            navigate('/onboarding');
-        } else {
-            navigate('/');
+        setError('');
+        setLoading(true);
+
+        try {
+            // Call the actual signup API
+            await authService.signup({
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+                role: role,
+                phone: formData.phone || undefined,
+                location: formData.address ? {
+                    address: formData.address,
+                    lat: 0, // TODO: Get actual coordinates
+                    lng: 0
+                } : undefined
+            });
+
+            // Navigate based on role
+            if (role === 'restaurant' || role === 'grocery') {
+                navigate('/dashboard');
+            } else if (role === 'consumer') {
+                navigate('/onboarding');
+            } else {
+                navigate('/');
+            }
+        } catch (err: any) {
+            setError(err.message || 'Signup failed. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -122,6 +147,20 @@ export const Signup: React.FC = () => {
                         <span>❤️</span> NGO
                     </button>
                 </div>
+
+                {/* Error Message */}
+                {error && (
+                    <div style={{
+                        background: '#FEE2E2',
+                        color: '#991B1B',
+                        padding: '0.75rem 1rem',
+                        borderRadius: '0.5rem',
+                        marginBottom: '1rem',
+                        fontSize: '0.9rem'
+                    }}>
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
@@ -331,8 +370,21 @@ export const Signup: React.FC = () => {
                         </div>
                     </div>
 
-                    <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem', padding: '1rem', fontSize: '1rem', fontWeight: 600 }}>
-                        Create Account
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="btn btn-primary"
+                        style={{
+                            width: '100%',
+                            marginTop: '1rem',
+                            padding: '1rem',
+                            fontSize: '1rem',
+                            fontWeight: 600,
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            opacity: loading ? 0.7 : 1
+                        }}
+                    >
+                        {loading ? 'Creating Account...' : 'Create Account'}
                     </button>
                 </form>
 

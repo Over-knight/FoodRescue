@@ -18,6 +18,20 @@ export interface SignupData {
     };
 }
 
+export interface BackendAuthResponse {
+    success: boolean;
+    message: string;
+    data: {
+        token: string;
+        user: {
+            id: string;
+            name: string;
+            email: string;
+            role: string;
+        };
+    };
+}
+
 export interface AuthResponse {
     token: string;
     user: {
@@ -31,22 +45,24 @@ export interface AuthResponse {
 export const authService = {
     // Login
     async login(credentials: LoginCredentials): Promise<AuthResponse> {
-        const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
-        if (response.token) {
-            localStorage.setItem('token', response.token);
-            localStorage.setItem('user', JSON.stringify(response.user));
+        const response = await apiClient.post<BackendAuthResponse>('/auth/login', credentials);
+        const { token, user } = response.data;
+        if (token) {
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
         }
-        return response;
+        return { token, user };
     },
 
     // Signup
     async signup(data: SignupData): Promise<AuthResponse> {
-        const response = await apiClient.post<AuthResponse>('/auth/signup', data);
-        if (response.token) {
-            localStorage.setItem('token', response.token);
-            localStorage.setItem('user', JSON.stringify(response.user));
+        const response = await apiClient.post<BackendAuthResponse>('/auth/signup', data);
+        const { token, user } = response.data;
+        if (token) {
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
         }
-        return response;
+        return { token, user };
     },
 
     // Logout
