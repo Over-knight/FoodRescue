@@ -30,3 +30,7 @@ coverage/
 
 # Misc
 .cache/
+
+# Old folders (moved to FoodRescue-Backend and FoodRescue-Frontend)
+/backend/
+/frontend/
