@@ -12,6 +12,11 @@ import orderRoutes from './routes/orderRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 import adminRoutes from './routes/adminRoutes';
 import dealRoutes from './routes/dealRoutes';
+import notificationRoutes from './routes/notificationRoutes';
+import reviewRoutes from './routes/reviewRoutes';
+import searchRoutes from './routes/searchRoutes';
+import favoriteRoutes from './routes/favoriteRoutes';
+import paymentRoutes from './routes/paymentRoutes';
 import { startProductCleanupJob } from './services/productCleanup';
 import { startOrderCleanupJob } from './services/orderCleanup';
 const app = express();
@@ -135,7 +140,12 @@ app.get('/', (req, res) => {
       orders: '/api/orders',
       analytics: '/api/analytics',
       admin: '/api/admin',
-      deals: '/api/deals'
+      deals: '/api/deals',
+      notifications: '/api/notifications',
+      reviews: '/api/reviews',
+      search: '/api/search',
+      favorites: '/api/favorites',
+      payments: '/api/payments'
     }
   });
 });
@@ -147,6 +157,11 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/deals', dealRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/favorites', favoriteRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // 404 handler 
 app.use((req, res) => {

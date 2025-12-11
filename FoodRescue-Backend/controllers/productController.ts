@@ -6,6 +6,7 @@ import { Category } from '../models/Category';
 import { validationResult } from 'express-validator';
 import { deleteMultipleImages } from '../utils/imageHelper';
 import mongoose from 'mongoose';
+import { IUser } from '../models/user';
 
 
 
