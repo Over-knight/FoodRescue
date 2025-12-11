@@ -17,6 +17,7 @@ import reviewRoutes from './routes/reviewRoutes';
 import searchRoutes from './routes/searchRoutes';
 import favoriteRoutes from './routes/favoriteRoutes';
 import paymentRoutes from './routes/paymentRoutes';
+import aiRoutes from './routes/aiRoutes';
 import { startProductCleanupJob } from './services/productCleanup';
 import { startOrderCleanupJob } from './services/orderCleanup';
 const app = express();
@@ -25,22 +26,10 @@ dotenv.config();
 
 import DatabaseConnection from './config/database';
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || "1233edhkndlfjkneinr93u943foodrescuesession2024secret",
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI,
-    ttl: 7 * 24 * 60 * 60 // 7 days
-  }),
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-  }
-}));
-
 const PORT = Number(process.env.PORT) || 5000;
+
+// Session configuration will be added after database connection
+
 
 
 //cors
@@ -60,11 +49,9 @@ if (process.env.NODE_ENV !== 'production') {
     next();
   });
 } else {
+  // Production - allow all origins for now
   app.use(cors({
-    origin: [ 'http://localhost:5173',
-      'http://localhost:5000',
-      'http://localhost:3000'
-    ],
+    origin: (origin, cb) => cb(null, true), // Allow all origins
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
@@ -81,6 +68,23 @@ app.use(helmet({
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Session middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET || "1233edhkndlfjkneinr93u943foodrescuesession2024secret",
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/foodrescue',
+    ttl: 7 * 24 * 60 * 60 // 7 days
+  }),
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  }
+}) as any); // Type assertion to fix express-session type mismatch
+
 
 // Health check route
 app.get('/health', async (req, res) => {
@@ -145,7 +149,8 @@ app.get('/', (req, res) => {
       reviews: '/api/reviews',
       search: '/api/search',
       favorites: '/api/favorites',
-      payments: '/api/payments'
+      payments: '/api/payments',
+      ai: '/api/ai'
     }
   });
 });
@@ -162,6 +167,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/ai', aiRoutes);
 
 // 404 handler 
 app.use((req, res) => {
