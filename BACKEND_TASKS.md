@@ -46,6 +46,22 @@ Currently, routes are scaffolded but need full implementation:
 - [ ] PATCH `/restaurants/:id/verify` - Verify restaurant (admin only)
 - [ ] Add user statistics endpoint (orders count, savings, etc.)
 
+#### AI/Smart Matching API (`/api/ai`)
+- [ ] POST `/match-foods` - Smart food matching algorithm
+  - Input: user preferences, budget, location
+  - Output: Ranked list of food items with match scores
+  - Algorithm: Score based on preferences (40%), budget (30%), location (20%), urgency (10%)
+  
+- [ ] GET `/recommendations/:userId` - Personalized recommendations
+  - Based on user's order history
+  - Consider favorite categories
+  - Factor in budget constraints
+  
+- [ ] POST `/pricing-suggestion` - AI pricing recommendations for restaurants
+  - Input: food details, expiry time
+  - Output: Suggested discount percentage
+  - Logic: Higher discount as expiry approaches
+
 ### 4. Analytics Data Endpoints
 The frontend analytics dashboard needs real data:
 
