@@ -17,8 +17,7 @@ dotenv.config();
 import DatabaseConnection from './config/database';
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || "",
-//   || '1233edhkndlfjkneinr93u943'
+  secret: process.env.SESSION_SECRET || "1233edhkndlfjkneinr93u943foodrescuesession2024secret",
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
@@ -119,7 +118,13 @@ app.get('/api', (req, res) => {
   });
 });
 
-// 404 handler
+// Routes 
+app.use('/api/auth', authRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+
+// 404 handler 
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -130,12 +135,6 @@ app.use((req, res) => {
     }
   });
 });
-
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
 
 // Global error handler
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -214,9 +214,7 @@ class EmailService {
     customerName: string;
     items: Array<{ productName: string; quantity: number; price: number }>;
     subtotal: number;
-    // deliveryFee: number;
     totalAmount: number;
-    // deliveryAddress: string;
     paymentMethod: string;
     handoverCode?: string;
   }): Promise<boolean> {
