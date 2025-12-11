@@ -83,16 +83,34 @@ export const directSignup = async (
       });
     }
 
+    // Map frontend roles to backend roles
+    const roleMap: Record<string, 'customer' | 'seller' | 'admin'> = {
+      'consumer': 'customer',
+      'restaurant': 'seller',
+      'grocery': 'seller',
+      'ngo': 'seller',
+      'customer': 'customer',
+      'seller': 'seller',
+      'admin': 'admin'
+    };
+
+    const mappedRole = roleMap[role] || 'customer';
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Split name into first and last
+    const nameParts = name.trim().split(' ');
+    const firstName = nameParts[0] || name;
+    const lastName = nameParts.slice(1).join(' ') || '';
 
     // Create new user
     const newUser = new User({
       email,
       password: hashedPassword,
-      firstName: name.split(' ')[0] || name,
-      lastName: name.split(' ').slice(1).join(' ') || '',
-      role: role || 'customer',
+      firstName,
+      lastName,
+      role: mappedRole,
       phone: phone || undefined,
       profile: {
         isVerified: true, // Auto-verify for now
