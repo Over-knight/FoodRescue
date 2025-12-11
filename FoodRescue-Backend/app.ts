@@ -123,6 +123,23 @@ app.get('/api', (req, res) => {
 });
 
 // Routes 
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'FoodRescue API is running',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      categories: '/api/categories',
+      products: '/api/products',
+      orders: '/api/orders',
+      analytics: '/api/analytics',
+      admin: '/api/admin',
+      deals: '/api/deals'
+    }
+  });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
