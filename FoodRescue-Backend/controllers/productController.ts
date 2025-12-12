@@ -57,11 +57,22 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     // Build filter object
     const filter: any = {};
 
-    // Only show active products for non-admin users
-    if (req.user?.role !== 'admin') {
+    // Filter by seller for non-admin users
+    if (req.user) {
+      const sellerRoles = ['restaurant', 'grocery', 'seller'];
+      if (sellerRoles.includes(req.user.role)) {
+        // Sellers only see their own products
+        filter.restaurant = req.user._id;
+      } else if (req.user.role !== 'admin') {
+        // Consumers and NGOs see only active products
+        filter.status = 'active';
+      } else if (status) {
+        // Admins can filter by status
+        filter.status = status;
+      }
+    } else {
+      // Unauthenticated users only see active products
       filter.status = 'active';
-    } else if (status) {
-      filter.status = status;
     }
 
     // Category filter
