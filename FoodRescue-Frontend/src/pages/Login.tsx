@@ -41,6 +41,7 @@ export const Login: React.FC = () => {
         <div style={{
             minHeight: '100vh',
             display: 'flex',
+            flexDirection: window.innerWidth <= 768 ? 'column' : 'row',
             background: '#F3F4F6'
         }}>
             {/* Left Side - Login Form */}
@@ -49,8 +50,9 @@ export const Login: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '2rem',
-                background: 'white'
+                padding: window.innerWidth <= 768 ? '1.5rem' : '2rem',
+                background: 'white',
+                minHeight: window.innerWidth <= 768 ? 'auto' : '100vh'
             }}>
                 <div style={{ width: '100%', maxWidth: '420px' }}>
                     {/* Logo */}
@@ -300,11 +302,12 @@ export const Login: React.FC = () => {
                 backgroundPosition: 'center',
                 backgroundBlendMode: 'overlay',
                 position: 'relative',
-                display: 'flex',
+                display: window.innerWidth <= 768 ? 'none' : 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                padding: '4rem',
-                color: 'white'
+                padding: window.innerWidth <= 768 ? '2rem' : '4rem',
+                color: 'white',
+                minHeight: window.innerWidth <= 768 ? '300px' : 'auto'
             }}>
                 {/* Overlay */}
                 <div style={{

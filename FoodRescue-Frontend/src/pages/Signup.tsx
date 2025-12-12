@@ -60,10 +60,10 @@ export const Signup: React.FC = () => {
     };
 
     return (
-        <div style={{ maxWidth: '600px', margin: '4rem auto', padding: '0 1rem' }}>
-            <div className="card" style={{ padding: '3rem', background: 'white' }}>
+        <div style={{ maxWidth: '600px', margin: window.innerWidth <= 768 ? '2rem auto' : '4rem auto', padding: '0 1rem' }}>
+            <div className="card" style={{ padding: window.innerWidth <= 768 ? '1.5rem' : '3rem', background: 'white' }}>
                 {/* Header */}
-                <div style={{ textAlign: 'center', marginBottom: '2rem', background: '#ECFDF5', padding: '2rem', borderRadius: '0.5rem', margin: '-3rem -3rem 2rem -3rem' }}>
+                <div style={{ textAlign: 'center', marginBottom: '2rem', background: '#ECFDF5', padding: window.innerWidth <= 768 ? '1.5rem' : '2rem', borderRadius: '0.5rem', margin: window.innerWidth <= 768 ? '-1.5rem -1.5rem 2rem -1.5rem' : '-3rem -3rem 2rem -3rem' }}>
                     <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.75rem', color: 'var(--text-main)' }}>Create your account</h2>
                     <p style={{ margin: 0, color: 'var(--text-muted)' }}>Join the movement to reduce food waste in Lagos</p>
                 </div>
