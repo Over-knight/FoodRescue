@@ -88,7 +88,7 @@ export const directSignup = async (
     const roleMap: Record<string, 'customer' | 'seller' | 'admin'> = {
       'consumer': 'customer',
       'restaurant': 'seller',
-      'grocery': 'seller',
+      'stores': 'seller',
       'ngo': 'seller',
       'customer': 'customer',
       'seller': 'seller',
@@ -115,7 +115,7 @@ export const directSignup = async (
       userProfile.address = location.address;
       
       // Geocode address for sellers (restaurants, groceries, NGOs)
-      if (role && ['restaurant', 'grocery', 'ngo'].includes(role)) {
+      if (role && ['restaurant', 'stores', 'ngo'].includes(role)) {
         try {
           console.log(`Geocoding address for ${role}: ${location.address}`);
           const locationData = await geocodeAddress(location.address);

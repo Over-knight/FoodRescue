@@ -7,6 +7,7 @@ import { validationResult } from 'express-validator';
 import { deleteMultipleImages } from '../utils/imageHelper';
 import mongoose from 'mongoose';
 import { IUser } from '../models/user';
+import { calculateDistance } from '../utils/geocoding';
 
 
 
@@ -51,7 +52,10 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       sort = 'createdAt',
       order = 'desc',
       page = 1,
-      limit = 20
+      limit = 20,
+      lat,
+      lng,
+      radius = 5000 // Default 5km radius in meters
     } = req.query;
 
     // Build filter object
@@ -59,7 +63,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
 
     // Filter by seller for non-admin users
     if (req.user) {
-      const sellerRoles = ['restaurant', 'grocery', 'seller'];
+      const sellerRoles = ['restaurant', 'stores', 'seller'];
       if (sellerRoles.includes(req.user.role)) {
         // Sellers only see their own products
         filter.restaurant = req.user._id;
@@ -112,9 +116,10 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     const sortField = validSorts.includes(sort as string) ? (sort as string) : 'createdAt';
     sortOptions[sortField] = order === 'asc' ? 1 : -1;
 
-    // Execute query with population
+    // Execute query with population (include restaurant location)
     const products = await Product.find(filter)
       .populate('category', 'name slug')
+      .populate('restaurant', 'firstName lastName profile.location profile.address')
       .select('-__v')
       .sort(sortOptions)
       .skip(skip)
@@ -143,6 +148,36 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
         console.error('Error attaching active deal to product list item:', e);
       }
     }));
+
+    // Calculate distances if location provided
+    if (lat && lng) {
+      products.forEach((product: any) => {
+        try {
+          // Get restaurant location from populated data
+          const restaurantLocation = product.restaurant?.profile?.location;
+          
+          if (restaurantLocation && restaurantLocation.coordinates) {
+            const [restLng, restLat] = restaurantLocation.coordinates;
+            const distance = calculateDistance(
+              { lat: Number(lat), lng: Number(lng) },
+              { lat: restLat, lng: restLng }
+            );
+            product.distance = distance; // in km
+          }
+        } catch (distErr) {
+          console.error('Error calculating distance:', distErr);
+        }
+      });
+
+      // Sort by distance if location provided and no other sort specified
+      if (sort === 'createdAt') {
+        products.sort((a: any, b: any) => {
+          const distA = a.distance !== undefined ? a.distance : 9999;
+          const distB = b.distance !== undefined ? b.distance : 9999;
+          return distA - distB;
+        });
+      }
+    }
 
     // Get total count for pagination
     const totalProducts = await Product.countDocuments(filter);

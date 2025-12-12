@@ -85,6 +85,13 @@ const categories = [
         description: 'Fresh fruits and fruit products',
         image: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?w=400',
         isActive: true
+    },
+    {
+        name: 'Canned Food',
+        slug: 'canned-food',
+        description: 'Canned goods, preserved foods, and packaged items',
+        image: 'https://images.unsplash.com/photo-1589621316382-008455b857cd?w=400',
+        isActive: true
     }
 ];
 
