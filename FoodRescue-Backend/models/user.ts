@@ -10,6 +10,11 @@ export interface IUser extends Document {
   role: 'customer' | 'admin' | 'seller';
   profile: {
     address?: string;
+    location?: {
+      type: string;
+      coordinates: number[]; // [longitude, latitude]
+      city?: string;
+    };
     // dateOfBirth?: Date;
     isVerified: boolean;
   };
@@ -105,6 +110,26 @@ const UserSchema = new Schema<IUser>({
       trim: true,
       maxlength: [200, 'Address cannot exceed 200 characters']
     },
+    location: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        validate: {
+          validator: function(coords: number[]) {
+            return coords.length === 2;
+          },
+          message: 'Coordinates must be [longitude, latitude]'
+        }
+      },
+      city: {
+        type: String,
+        trim: true
+      }
+    },
     // dateOfBirth: {
     //   type: Date
     // },
@@ -123,6 +148,7 @@ UserSchema.index({ phone: 1 });
 UserSchema.index({ role: 1 });
 UserSchema.index({ isActive: 1 });
 UserSchema.index({ createdAt: -1 });
+UserSchema.index({ 'profile.location': '2dsphere' }); // Geospatial index for location queries
 
 const User = mongoose.model<IUser>("User", UserSchema);
 export default User;

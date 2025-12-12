@@ -175,13 +175,20 @@ body {
 /* Mobile Navigation */
 @media (max-width: 768px) {
   .nav-content {
-    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
   }
 
   .mobile-menu-toggle {
     display: block !important;
-    z-index: 100;
-    margin-left: auto;
+    z-index: 101;
+    order: 2;
+  }
+
+  .logo {
+    order: 1;
   }
 
   .nav-links {
@@ -198,7 +205,8 @@ body {
     box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
     transition: right 0.3s ease-in-out;
     gap: 1.5rem;
-    z-index: 99;
+    z-index: 100;
+    order: 3;
   }
 
   .nav-links.mobile-open {

@@ -6,6 +6,7 @@ import User from '../models/user';
 import { IUser } from '../models/user';
 import { AuthResponse, ResetCodeResponse, ProfileResponse } from '../Types/auth.types';
 import emailService from "../services/emailService";
+import { geocodeAddress, getDefaultLocation } from '../utils/geocoding';
 
 
 export const checkProfileComplete = (user: IUser): boolean => {
@@ -112,6 +113,29 @@ export const directSignup = async (
     // Only add address if it exists
     if (location?.address) {
       userProfile.address = location.address;
+      
+      // Geocode address for sellers (restaurants, groceries, NGOs)
+      if (role && ['restaurant', 'grocery', 'ngo'].includes(role)) {
+        try {
+          console.log(`Geocoding address for ${role}: ${location.address}`);
+          const locationData = await geocodeAddress(location.address);
+          userProfile.location = {
+            type: 'Point',
+            coordinates: [locationData.coordinates.longitude, locationData.coordinates.latitude],
+            city: locationData.city || 'Lagos'
+          };
+          console.log(`Geocoded successfully:`, userProfile.location);
+        } catch (geoError: any) {
+          console.error('Geocoding failed:', geoError.message);
+          // Use default Lagos location if geocoding fails
+          const defaultLoc = getDefaultLocation();
+          userProfile.location = {
+            type: 'Point',
+            coordinates: [defaultLoc.coordinates.longitude, defaultLoc.coordinates.latitude],
+            city: 'Lagos'
+          };
+        }
+      }
     }
 
     const userData: any = {
