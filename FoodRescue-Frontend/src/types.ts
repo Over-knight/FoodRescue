@@ -42,6 +42,7 @@ export interface Food {
   category: string;
   tags: string[];
   status: 'active' | 'reserved' | 'completed' | 'expired';
+  distance?: number; // Distance in kilometers (optional)
 }
 
 export interface Order {

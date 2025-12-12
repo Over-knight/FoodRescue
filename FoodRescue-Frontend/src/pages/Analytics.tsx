@@ -29,6 +29,14 @@ export const Analytics: React.FC = () => {
             setLoading(true);
             setError('');
 
+            // Check if demo mode (no token)
+            const token = localStorage.getItem('token');
+            if (!token) {
+                // Use mock data for demo
+                loadDemoData();
+                return;
+            }
+
             // Fetch all analytics data in parallel
             const [overviewData, salesResponse, categoryResponse, wasteResponse] = await Promise.all([
                 analyticsApiService.getRestaurantOverview(),
@@ -85,6 +93,68 @@ export const Analytics: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Demo mode data loader
+    const loadDemoData = () => {
+        // Mock sales data for past 30 days
+        const mockSales = Array.from({ length: 30 }, (_, i) => ({
+            date: `Day ${i + 1}`,
+            mealsSaved: Math.floor(Math.random() * 50) + 20,
+            revenue: Math.floor(Math.random() * 30000) + 15000,
+            orders: Math.floor(Math.random() * 20) + 5
+        }));
+        setSalesData(mockSales);
+
+        // Mock category data
+        const mockCategories = [
+            { category: 'Meals', count: 450, revenue: 360000 },
+            { category: 'Groceries', count: 320, revenue: 256000 },
+            { category: 'Bakery', count: 180, revenue: 144000 },
+            { category: 'Beverages', count: 120, revenue: 96000 }
+        ];
+        setCategoryData(mockCategories);
+
+        // Mock overview and waste
+        const mockOverview = { totalRevenue: 856000 };
+        const mockWaste = {
+            overview: {
+                totalMealsSaved: 1070,
+                weightSaved: 428,
+                co2Saved: 856
+            }
+        };
+        setOverview(mockOverview);
+        setWasteData(mockWaste);
+
+        // Calculate demo stats
+        const demoStats = {
+            totalMeals: 1070,
+            totalRevenue: 856000,
+            totalWaste: 428,
+            co2Saved: 856,
+            trend: 15,
+            avgMealsPerDay: 36,
+            avgRevenuePerDay: 28533
+        };
+        setStats(demoStats);
+
+        // Demo predictions
+        setPredictions({
+            nextWeekMeals: 252,
+            nextWeekRevenue: 201600,
+            trend: 'increasing'
+        });
+
+        // Demo recommendations
+        setRecommendations([
+            '📈 Excellent! Your waste reduction increased by 15% this month. Keep it up!',
+            '🍱 Meals is your best performer with 450 meals saved.',
+            '🌍 You\'ve saved 856.0kg of CO2 emissions - equivalent to 2140 km of car travel!',
+            '💡 Demo mode active - Sign in with a real account to see your actual data'
+        ]);
+
+        setLoading(false);
     };
 
     // Calculate trend (comparing first week vs last week)
