@@ -13,12 +13,21 @@ const getTimeRemaining = (expiryTime: string) => {
 
     if (diff <= 0) return 'Expired';
 
-    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
+    // Show days if more than 24 hours
+    if (days > 0) {
+        return `${days} day${days > 1 ? 's' : ''} left`;
+    }
+
+    // Show hours and minutes if less than a day
     if (hours > 0) {
         return `${hours}h ${minutes}m left`;
     }
+
+    // Show only minutes if less than an hour
     return `${minutes}m left`;
 };
 

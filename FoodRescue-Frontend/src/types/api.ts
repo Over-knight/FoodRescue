@@ -45,6 +45,7 @@ export interface ProductPricing {
 export interface ProductInventory {
   availableStock: number;
   lowStockThreshold: number;
+  unit: string;
 }
 
 export interface ProductStats {
@@ -64,6 +65,7 @@ export interface BackendProduct {
   stats: ProductStats;
   tags: string[];
   status: 'active' | 'inactive' | 'out_of_stock' | 'draft';
+  expiryDate: string;
   dealId?: string;
   createdAt: string;
   updatedAt: string;

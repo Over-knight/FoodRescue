@@ -5,6 +5,7 @@ import { categoryService } from '../services/categoryService';
 import { BackendProduct, BackendCategory } from '../types/api';
 import { koboToNaira } from '../utils/apiHelpers';
 import { Link } from 'react-router-dom';
+import { ProductListItem } from '../components/ProductListItem';
 
 export const RestaurantDashboard: React.FC = () => {
     const { user } = useAuth();
@@ -140,6 +141,31 @@ export const RestaurantDashboard: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleEditProduct = (product: BackendProduct) => {
+        // Populate form with product data
+        const expiryDate = new Date(product.expiryDate);
+        const formattedDate = expiryDate.toISOString().slice(0, 16);
+
+        setFormData({
+            name: product.name,
+            description: product.description || '',
+            originalPrice: koboToNaira(product.pricing.retail.price).toString(),
+            quantity: product.inventory.availableStock.toString(),
+            category: typeof product.category === 'object' ? product.category._id : product.category,
+            tags: product.tags.join(', '),
+            expiryDate: formattedDate,
+            unit: product.inventory.unit
+        });
+
+        // Scroll to form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        alert('Product loaded into form. Modify fields and submit to update.\n\nNote: You\'ll need to re-upload images.');
+    };
+
+    const handleDeleteProduct = (productId: string) => {
+        setProducts(products.filter(p => p._id !== productId));
     };
 
     if (!user || (user.role !== 'seller' && user.role !== 'restaurant')) {
