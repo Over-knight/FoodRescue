@@ -11,7 +11,7 @@
 ### **Backend API Endpoints** (Deployed)
 
 #### 1. Authentication (`/api/auth`)
-- ✅ POST `/signup` - User registration (consumer, restaurant, grocery, NGO)
+- ✅ POST `/signup` - User registration (consumer, restaurant, stores, NGO)
 - ✅ POST `/login` - User login with JWT tokens
 - ✅ GET `/profile` - Get authenticated user profile
 - ✅ PATCH `/profile` - Update user profile
@@ -119,7 +119,7 @@
 #### **Pages**
 - ✅ **Landing Page** - Hero section, features, testimonials, restaurant CTA
 - ✅ **Login Page** - Beautiful split-screen design with hero section
-- ✅ **Signup Page** - Role-based registration (consumer/restaurant/grocery/NGO)
+- ✅ **Signup Page** - Role-based registration (consumer/restaurant/stores/NGO)
 - ✅ **Home Page** - Food listings with smart filters (All/Meals/Groceries)
 - ✅ **Dashboard** - Vendor management interface
 - ✅ **Analytics** - Data science dashboard with charts (Recharts)
@@ -416,7 +416,7 @@ npm start
 ### **Demo Accounts**
 - **Consumer:** demo@consumer.com / password
 - **Restaurant:** demo@restaurant.com / password
-- **Grocery:** demo@grocery.com / password
+- **Store:** demo@stores.com / password
 - **Admin:** admin@foodrescue.com / password
 
 ---
@@ -438,7 +438,7 @@ npm start
 1. **AI-Powered Matching** - Smart algorithm scores foods based on multiple factors
 2. **Dynamic Pricing** - AI suggests optimal discounts based on expiry time
 3. **Data Science Dashboard** - Real-time analytics with predictive insights
-4. **Dual Vendor Support** - Both restaurants AND grocery stores
+4. **Dual Vendor Support** - Both restaurants AND stores
 5. **Environmental Impact** - CO2 savings calculator
 
 ### **Technical Stack**

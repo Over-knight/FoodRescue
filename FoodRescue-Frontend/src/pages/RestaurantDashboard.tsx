@@ -6,6 +6,7 @@ import { BackendProduct, BackendCategory } from '../types/api';
 import { koboToNaira } from '../utils/apiHelpers';
 import { Link } from 'react-router-dom';
 import { ProductListItem } from '../components/ProductListItem';
+import './RestaurantDashboard.css';
 
 export const RestaurantDashboard: React.FC = () => {
     const { user } = useAuth();
@@ -173,71 +174,67 @@ export const RestaurantDashboard: React.FC = () => {
     }
 
     return (
-        <div className="container" style={{ padding: '2rem 1rem' }}>
-            <h1 style={{ marginBottom: '2rem' }}>Restaurant Dashboard</h1>
+        <div className="container dashboard-container">
+            <h1 className="dashboard-title">Restaurant Dashboard</h1>
 
             {/* Verification Banner */}
-            <div style={{ background: '#FFF7ED', border: '1px solid #FFEDD5', padding: '1rem', borderRadius: '0.5rem', marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ width: '32px', height: '32px', background: '#EA580C', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '1.2rem' }}>!</div>
+            <div className="verification-banner">
+                <div className="verification-banner-content">
+                    <div className="verification-banner-icon">!</div>
                     <div>
-                        <div style={{ fontWeight: 'bold', color: '#9A3412' }}>Action Required: Verify Account</div>
-                        <div style={{ fontSize: '0.9rem', color: '#C2410C' }}>Please submit your business documents to unlock full features.</div>
+                        <div className="verification-banner-title">Action Required: Verify Account</div>
+                        <div className="verification-banner-description">Please submit your business documents to unlock full features.</div>
                     </div>
                 </div>
-                <Link to="/verification" className="btn" style={{ background: '#EA580C', color: 'white', fontSize: '0.9rem', padding: '0.5rem 1rem', textDecoration: 'none' }}>
+                <Link to="/verification" className="btn verification-banner-button">
                     Verify Now
                 </Link>
             </div>
 
             {/* Stats Cards */}
             {stats && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-                    <div className="card" style={{ padding: '1.5rem' }}>
-                        <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Total Sales</h3>
-                        <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>₦{stats.totalSales.toLocaleString()}</div>
+                <div className="stats-grid">
+                    <div className="card stat-card">
+                        <h3 className="stat-title">Total Sales</h3>
+                        <div className="stat-value">₦{stats.totalSales.toLocaleString()}</div>
                     </div>
-                    <div className="card" style={{ padding: '1.5rem' }}>
-                        <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Meals Saved</h3>
-                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--success)' }}>{stats.mealsSaved}</div>
+                    <div className="card stat-card">
+                        <h3 className="stat-title">Meals Saved</h3>
+                        <div className="stat-value stat-value-success">{stats.mealsSaved}</div>
                     </div>
-                    <div className="card" style={{ padding: '1.5rem' }}>
-                        <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>CO₂ Avoided</h3>
-                        <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{stats.co2Saved}kg</div>
+                    <div className="card stat-card">
+                        <h3 className="stat-title">CO₂ Avoided</h3>
+                        <div className="stat-value stat-value-primary">{stats.co2Saved}kg</div>
                     </div>
                 </div>
             )}
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr',
-                gap: '2rem'
-            }}>
+            <div className="dashboard-grid">
 
                 {/* Post Food Form */}
                 <div>
-                    <div className="card" style={{
-                        padding: window.innerWidth <= 768 ? '1.5rem' : '2rem'
-                    }}>
-                        <h2 style={{ marginBottom: '1.5rem' }}>Post New Food</h2>
-                        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div className="card form-card">
+                        <h2 className="form-title">Post New Food</h2>
+                        <form onSubmit={handleSubmit} className="form-group">
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Item Name</label>
+                                <label htmlFor="item-name" className="form-label">Item Name</label>
                                 <input
+                                    id="item-name"
                                     type="text"
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB' }}
+                                    className="form-input"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Description</label>
+                                <label htmlFor="description" className="form-label">Description</label>
                                 <textarea
+                                    id="description"
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB' }}
+                                    className="form-textarea"
                                     rows={3}
                                     required
                                 />
@@ -245,11 +242,12 @@ export const RestaurantDashboard: React.FC = () => {
 
                             {/* Category Selection */}
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Category</label>
+                                <label htmlFor="category" className="form-label">Category</label>
                                 <select
+                                    id="category"
                                     value={formData.category}
                                     onChange={e => setFormData({ ...formData, category: e.target.value })}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB' }}
+                                    className="form-select"
                                     required
                                 >
                                     <option value="">Select a category</option>
@@ -261,100 +259,105 @@ export const RestaurantDashboard: React.FC = () => {
 
                             {/* Image Upload (Multiple) */}
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Food Images (Max 5)</label>
+                                <label htmlFor="food-images" className="form-label">Food Images (Max 5)</label>
                                 <input
+                                    id="food-images"
                                     type="file"
                                     accept="image/*"
                                     multiple
                                     onChange={handleImageChange}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB' }}
+                                    className="form-input"
                                     required
                                 />
                                 {imagePreviews.length > 0 && (
-                                    <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.5rem' }}>
+                                    <div className="image-preview-grid">
                                         {imagePreviews.map((preview, idx) => (
                                             <img
                                                 key={idx}
                                                 src={preview}
                                                 alt={`Preview ${idx + 1}`}
-                                                style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '0.5rem' }}
+                                                className="image-preview"
                                             />
                                         ))}
                                     </div>
                                 )}
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div className="price-quantity-grid">
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Quantity</label>
+                                    <label htmlFor="quantity" className="form-label">Quantity</label>
                                     <input
+                                        id="quantity"
                                         type="number"
                                         value={formData.quantity}
                                         onChange={e => setFormData({ ...formData, quantity: e.target.value })}
-                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB' }}
+                                        className="form-input"
                                         required
                                         min="1"
                                     />
                                 </div>
 
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Unit</label>
+                                    <label htmlFor="unit" className="form-label">Unit</label>
                                     <input
+                                        id="unit"
                                         type="text"
                                         value={formData.unit}
                                         onChange={e => setFormData({ ...formData, unit: e.target.value })}
-                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB' }}
+                                        className="form-input"
                                         placeholder="e.g. plate, box"
                                     />
                                 </div>
                             </div>
 
-                            <div style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Expiry Date</label>
+                            <div>
+                                <label htmlFor="expiry-date" className="form-label">Expiry Date</label>
                                 <input
+                                    id="expiry-date"
                                     type="datetime-local"
                                     value={formData.expiryDate}
                                     onChange={e => setFormData({ ...formData, expiryDate: e.target.value })}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB' }}
+                                    className="form-input"
                                     required
                                     min={new Date().toISOString().slice(0, 16)}
                                 />
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Original Price (₦)</label>
+                                <label htmlFor="original-price" className="form-label">Original Price (₦)</label>
                                 <input
+                                    id="original-price"
                                     type="number"
                                     value={formData.originalPrice}
                                     onChange={e => setFormData({ ...formData, originalPrice: e.target.value })}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB' }}
+                                    className="form-input"
                                     required
                                 />
                             </div>
 
                             {/* Tags */}
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Tags (comma-separated)</label>
+                                <label htmlFor="tags" className="form-label">Tags (comma-separated)</label>
                                 <input
+                                    id="tags"
                                     type="text"
                                     value={formData.tags}
                                     onChange={e => setFormData({ ...formData, tags: e.target.value })}
-                                    style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB' }}
+                                    className="form-input"
                                     placeholder="e.g. rice, lunch, spicy"
                                 />
                             </div>
 
                             {/* Error Display */}
                             {error && (
-                                <div style={{ background: '#FEE2E2', border: '1px solid #EF4444', borderRadius: '0.5rem', padding: '1rem', color: '#EF4444' }}>
+                                <div className="error-message">
                                     {error}
                                 </div>
                             )}
 
                             <button
                                 type="submit"
-                                className="btn btn-primary"
-                                style={{ marginTop: '1rem' }}
+                                className="btn btn-primary submit-button"
                                 disabled={loading}
                             >
                                 {loading ? 'Creating...' : 'Post Food Listing'}
@@ -366,8 +369,8 @@ export const RestaurantDashboard: React.FC = () => {
 
                 {/* Active Listings */}
                 <div>
-                    <h2 style={{ marginBottom: '1.5rem' }}>Active Listings</h2>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <h2 className="listings-title">Active Listings</h2>
+                    <div className="listings-section">
                         {products.map(product => (
                             <ProductListItem
                                 key={product._id}
@@ -376,7 +379,7 @@ export const RestaurantDashboard: React.FC = () => {
                                 onDelete={handleDeleteProduct}
                             />
                         ))}
-                        {products.length === 0 && <p style={{ color: 'var(--text-muted)' }}>No active listings.</p>}
+                        {products.length === 0 && <p className="no-listings-message">No active listings.</p>}
                     </div>
                 </div>
 

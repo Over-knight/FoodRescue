@@ -1,6 +1,6 @@
 # FoodRescue Lagos 🍱
 
-**FoodRescue Lagos** is a mobile-first marketplace connecting **restaurants and grocery stores** with surplus food to consumers at discounted prices, reducing food waste across the entire supply chain while fighting hunger.
+**FoodRescue Lagos** is a mobile-first marketplace connecting **restaurants and stores** with surplus food to consumers at discounted prices, reducing food waste across the entire supply chain while fighting hunger.
 
 ---
 
@@ -33,9 +33,9 @@
 - 🍱 **Food Preferences** - Select favorite categories (Rice, Pastries, Fresh Produce, Dairy, etc.)
 - 🔄 **Smart Filters** - Toggle between "All Items", "Meals" (restaurants), or "Groceries" (stores)
 
-### For Restaurants & Grocery Stores
+### For Restaurants & Stores
 - 📝 **Post Surplus Food** - List excess inventory before it goes to waste
-- 🛒 **Multiple Vendor Types** - Restaurants (cooked meals) OR Grocery Stores (produce, dairy, packaged goods)
+- 🛒 **Multiple Vendor Types** - Restaurants (cooked meals) OR Stores (produce, dairy, packaged goods)
 - 💵 **Revenue Recovery** - Earn money from food that would otherwise be discarded
 - 📊 **Analytics Dashboard** - Comprehensive data science insights
 - 📈 **Performance Tracking** - Monitor meals saved, revenue, and waste reduction
@@ -155,10 +155,10 @@ Server runs at `http://localhost:5000`
 - **Password**: `password123`
 - **Features**: Post food, analytics dashboard, insights
 
-### Grocery Store
+### Store
 - **Email**: `shoprite@example.com`
 - **Password**: `password123`
-- **Features**: Post grocery items, analytics dashboard, insights
+- **Features**: Post store items, analytics dashboard, insights
 - **Demo Items**: Rice, Tomatoes, Milk, Bread, Eggs, Canned Beans
 
 ### Admin
@@ -177,8 +177,8 @@ Server runs at `http://localhost:5000`
 4. **Use filter tabs**: Toggle between "All Items", "Meals", or "Groceries"
 5. View food details and checkout
 
-### 2. Restaurant/Grocery Store Flow
-1. Login as restaurant OR grocery store
+### 2. Restaurant/Store Flow
+1. Login as restaurant OR store
 2. Post surplus food items (meals or groceries)
 3. View **Analytics Dashboard** (`/analytics`)
 4. Review data science insights and predictions
@@ -221,11 +221,11 @@ co2Saved = wasteReduced * 2.5 // kg CO₂ per kg food waste
 
 ## 🌍 Environmental Impact
 
-Every meal AND grocery item saved through FoodRescue contributes to:
+Every meal AND store item saved through FoodRescue contributes to:
 - **Reduced Food Waste** - Preventing edible food from landfills (cooked meals + fresh produce + packaged goods)
 - **Lower CO₂ Emissions** - 2.5kg CO₂ saved per kg of food waste prevented
 - **Resource Conservation** - Saving water, energy, and agricultural resources used in food production
-- **Supply Chain Efficiency** - Tackling waste at both retail (grocery stores) and preparation (restaurants) levels
+- **Supply Chain Efficiency** - Tackling waste at both retail (stores) and preparation (restaurants) levels
 - **Hunger Relief** - Making nutritious food accessible at affordable prices
 
 **Example Impact:**
