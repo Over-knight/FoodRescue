@@ -105,19 +105,31 @@ export const directSignup = async (
     const lastName = nameParts.slice(1).join(' ') || '';
 
     // Create new user
-    const newUser = new User({
+    const userProfile: any = {
+      isVerified: true, // Auto-verify for now
+    };
+
+    // Only add address if it exists
+    if (location?.address) {
+      userProfile.address = location.address;
+    }
+
+    const userData: any = {
       email,
       password: hashedPassword,
       firstName,
       lastName,
       role: mappedRole,
-      phone: phone || undefined,
-      profile: {
-        isVerified: true, // Auto-verify for now
-        address: location?.address || undefined
-      },
+      profile: userProfile,
       isActive: true
-    });
+    };
+
+    // Only add phone if it exists
+    if (phone) {
+      userData.phone = phone;
+    }
+
+    const newUser = new User(userData);
 
     await newUser.save();
 
@@ -133,8 +145,27 @@ export const directSignup = async (
       message: "Account created successfully",
       data: { user: userResponse as any, token }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Direct signup error:", error);
+
+    // Handle mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map((err: any) => err.message);
+      return res.status(400).json({
+        success: false,
+        message: `Validation error: ${validationErrors.join(', ')}`
+      });
+    }
+
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({
+        success: false,
+        message: `An account with this ${field} already exists`
+      });
+    }
+
     return res.status(500).json({
       success: false,
       message: "Server error during signup"
