@@ -213,7 +213,7 @@ export const MOCK_FOODS: Food[] = [
     quantityType: 'cartons',
     expiryTime: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(), // 30 days
     image: 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?auto=format&fit=crop&w=1000&q=80', // Canned food
-    category: 'Packaged Goods',
+    category: 'Canned Food',
     tags: ['Canned', 'Protein'],
     status: 'active',
   }
