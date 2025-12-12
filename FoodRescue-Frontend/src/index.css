@@ -176,21 +176,20 @@ body {
 @media (max-width: 768px) {
   .nav-content {
     display: flex !important;
-    justify-content: space-between !important;
     align-items: center !important;
     width: 100% !important;
-    position: relative !important;
+    gap: 1rem !important;
+  }
+
+  .logo {
+    flex-shrink: 0 !important;
   }
 
   .mobile-menu-toggle {
     display: block !important;
     z-index: 101 !important;
-    position: absolute !important;
-    right: 0 !important;
-  }
-
-  .logo {
-    position: relative !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
   }
 
   .nav-links {
