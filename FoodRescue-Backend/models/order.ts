@@ -207,8 +207,8 @@ OrderSchema.index({ restaurant: 1, status: 1 });
 OrderSchema.index({ orderNumber: 1 }, { unique: true });
 OrderSchema.index({ pickupCode: 1, restaurant: 1 });
 
-// Generate order number and pickup code before saving
-OrderSchema.pre('save', function(next) {
+// Generate order number and pickup code before validation
+OrderSchema.pre('validate', function(next) {
   if (this.isNew) {
     // Generate order number
     if (!this.orderNumber) {
