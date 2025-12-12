@@ -173,8 +173,8 @@ export const Home: React.FC = () => {
                 </div>
             )}
             <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+                display: 'flex',
+                flexWrap: 'wrap',
                 gap: '1.5rem',
                 width: '100%'
             }}>
@@ -198,7 +198,10 @@ export const Home: React.FC = () => {
                             flexDirection: 'column',
                             overflow: 'hidden',
                             transition: 'transform 0.2s, box-shadow 0.2s',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            flex: '1 1 calc(33.333% - 1rem)',
+                            minWidth: '280px',
+                            maxWidth: '400px'
                         }}>
                             {/* Image Section */}
                             <div style={{ position: 'relative', height: '200px', overflow: 'hidden' }}>
