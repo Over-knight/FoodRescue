@@ -49,7 +49,16 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // Check all products belong to same restaurant
+    // Check all products belong to same restaurant and have valid restaurant field
+    const productsWithoutRestaurant = products.filter(p => !p.restaurant);
+    if (productsWithoutRestaurant.length > 0) {
+      res.status(500).json({
+        success: false,
+        message: 'Configuration Error: One or more products are missing a seller/restaurant association.'
+      });
+      return;
+    }
+
     const restaurantIds = [...new Set(products.map(p => p.restaurant.toString()))];
     if (restaurantIds.length > 1) {
       res.status(400).json({
@@ -194,22 +203,22 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     await order.populate('restaurant', 'firstName lastName email phone');
 
     // Send order confirmation email with pickup code
-    try {
-      await sendPickupOrderConfirmation(
-        (order as any).customer.email,
-        {
-          orderNumber: order.orderNumber,
-          pickupCode: order.pickupCode,
-          items: order.items,
-          totalAmount: order.totalAmount,
-          pickupLocation: order.pickupLocation,
-          scheduledPickupTime: order.scheduledPickupTime
-        }
-      );
-    } catch (emailError) {
-      console.error('Failed to send order confirmation email:', emailError);
-      // Don't fail the order if email fails
-    }
+    // try {
+    //   await sendPickupOrderConfirmation(
+    //     (order as any).customer.email,
+    //     {
+    //       orderNumber: order.orderNumber,
+    //       pickupCode: order.pickupCode,
+    //       items: order.items,
+    //       totalAmount: order.totalAmount,
+    //       pickupLocation: order.pickupLocation,
+    //       scheduledPickupTime: order.scheduledPickupTime
+    //     }
+    //   );
+    // } catch (emailError) {
+    //   console.error('Failed to send order confirmation email:', emailError);
+    //   // Don't fail the order if email fails
+    // }
 
     res.status(201).json({
       success: true,
