@@ -208,7 +208,7 @@ export const Signup: React.FC = () => {
                                         value={formData.organizationName}
                                         onChange={handleChange}
                                         required
-                                        style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                         placeholder="Mama's Kitchen"
                                     />
                                 </div>
@@ -224,7 +224,7 @@ export const Signup: React.FC = () => {
                                             value={formData.name}
                                             onChange={handleChange}
                                             required
-                                            style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                             placeholder="John Doe"
                                         />
                                     </div>
@@ -239,7 +239,7 @@ export const Signup: React.FC = () => {
                                             value={formData.phone}
                                             onChange={handleChange}
                                             required
-                                            style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                             placeholder="+234..."
                                         />
                                     </div>
@@ -255,7 +255,7 @@ export const Signup: React.FC = () => {
                                         value={formData.address}
                                         onChange={handleChange}
                                         required
-                                        style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                         placeholder="123 Lekki Phase 1, Lagos"
                                     />
                                 </div>
@@ -276,7 +276,7 @@ export const Signup: React.FC = () => {
                                         value={formData.organizationName}
                                         onChange={handleChange}
                                         required
-                                        style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                         placeholder="Lagos Food Bank"
                                     />
                                 </div>
@@ -292,7 +292,7 @@ export const Signup: React.FC = () => {
                                             value={formData.name}
                                             onChange={handleChange}
                                             required
-                                            style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                             placeholder="Jane Smith"
                                         />
                                     </div>
@@ -307,7 +307,7 @@ export const Signup: React.FC = () => {
                                             value={formData.phone}
                                             onChange={handleChange}
                                             required
-                                            style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                             placeholder="+234..."
                                         />
                                     </div>
@@ -323,7 +323,7 @@ export const Signup: React.FC = () => {
                                         value={formData.address}
                                         onChange={handleChange}
                                         required
-                                        style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                         placeholder="45 Ikeja GRA, Lagos"
                                     />
                                 </div>
@@ -343,7 +343,7 @@ export const Signup: React.FC = () => {
                                         value={formData.organizationName}
                                         onChange={handleChange}
                                         required
-                                        style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                         placeholder="Lagos Fresh Market"
                                     />
                                 </div>
@@ -359,7 +359,7 @@ export const Signup: React.FC = () => {
                                             value={formData.name}
                                             onChange={handleChange}
                                             required
-                                            style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                             placeholder="John Doe"
                                         />
                                     </div>
@@ -374,7 +374,7 @@ export const Signup: React.FC = () => {
                                             value={formData.phone}
                                             onChange={handleChange}
                                             required
-                                            style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                            style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                             placeholder="+234..."
                                         />
                                     </div>
@@ -389,7 +389,7 @@ export const Signup: React.FC = () => {
                                         value={formData.address}
                                         onChange={handleChange}
                                         required
-                                        style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                         placeholder="10 Balogun Street, Lagos"
                                     />
                                 </div>
@@ -409,7 +409,7 @@ export const Signup: React.FC = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
-                                style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                 placeholder="name@company.com"
                             />
                         </div>
@@ -425,7 +425,7 @@ export const Signup: React.FC = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
-                                style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
                                 placeholder="Create a strong password"
                             />
                         </div>
