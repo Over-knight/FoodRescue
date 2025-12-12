@@ -125,7 +125,7 @@ export const Login: React.FC = () => {
                                     color: '#9CA3AF',
                                     fontSize: '1.1rem'
                                 }}>
-                                    ✉️
+
                                 </span>
                                 <input
                                     type="email"
@@ -385,7 +385,7 @@ export const Login: React.FC = () => {
                                 justifyContent: 'center',
                                 fontSize: '1.5rem'
                             }}>
-                                ❤️
+
                             </div>
                             <div>
                                 <div style={{ fontSize: '1.75rem', fontWeight: 700 }}>Support NGOs</div>

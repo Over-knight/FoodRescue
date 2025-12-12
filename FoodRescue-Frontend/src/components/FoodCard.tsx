@@ -39,7 +39,7 @@ export const FoodCard: React.FC<FoodCardProps> = ({ food }) => {
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.875rem', color: '#6B7280', marginBottom: '1rem' }}>
                     <span>🕒 Expires in {new Date(food.expiryTime).getHours() - new Date().getHours()}h</span>
                     <span>•</span>
-                    <span>📦 {food.quantity} left</span>
+                    <span>{food.quantity} left</span>
                 </div>
 
                 <Link to={`/checkout/${food.id}`} className="btn btn-primary" style={{ width: '100%', textDecoration: 'none', boxSizing: 'border-box' }}>

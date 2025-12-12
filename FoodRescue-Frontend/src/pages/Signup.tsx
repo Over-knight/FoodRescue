@@ -40,13 +40,13 @@ export const Signup: React.FC = () => {
                 } : undefined
             });
 
-            // Navigate based on role
+            // Use window.location to force page reload and AuthContext update
             if (role === 'restaurant' || role === 'grocery') {
-                navigate('/dashboard');
+                window.location.href = '/dashboard';
             } else if (role === 'consumer') {
-                navigate('/onboarding');
+                window.location.href = '/onboarding';
             } else {
-                navigate('/');
+                window.location.href = '/';
             }
         } catch (err: any) {
             setError(err.message || 'Signup failed. Please try again.');
@@ -106,7 +106,7 @@ export const Signup: React.FC = () => {
                             transition: 'all 0.2s'
                         }}
                     >
-                        <span>🍽️</span> Restaurant
+                        Restaurant
                     </button>
                     <button
                         type="button"
@@ -125,7 +125,7 @@ export const Signup: React.FC = () => {
                             transition: 'all 0.2s'
                         }}
                     >
-                        <span>🛒</span> Grocery Store
+                        Grocery Store
                     </button>
                     <button
                         type="button"
@@ -144,7 +144,7 @@ export const Signup: React.FC = () => {
                             transition: 'all 0.2s'
                         }}
                     >
-                        <span>❤️</span> NGO
+                        NGO
                     </button>
                 </div>
 
@@ -207,7 +207,7 @@ export const Signup: React.FC = () => {
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>Restaurant Name</label>
                                 <div style={{ position: 'relative' }}>
-                                    <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }}>🍽️</span>
+
                                     <input
                                         type="text"
                                         name="organizationName"
@@ -254,7 +254,7 @@ export const Signup: React.FC = () => {
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>Restaurant Address</label>
                                 <div style={{ position: 'relative' }}>
-                                    <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }}>📍</span>
+
                                     <input
                                         type="text"
                                         name="address"
@@ -275,7 +275,7 @@ export const Signup: React.FC = () => {
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>Organization Name</label>
                                 <div style={{ position: 'relative' }}>
-                                    <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }}>❤️</span>
+
                                     <input
                                         type="text"
                                         name="organizationName"
@@ -322,7 +322,7 @@ export const Signup: React.FC = () => {
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>Office Address</label>
                                 <div style={{ position: 'relative' }}>
-                                    <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }}>📍</span>
+
                                     <input
                                         type="text"
                                         name="address"
@@ -341,7 +341,7 @@ export const Signup: React.FC = () => {
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>Email Address</label>
                         <div style={{ position: 'relative' }}>
-                            <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }}>✉️</span>
+
                             <input
                                 type="email"
                                 name="email"

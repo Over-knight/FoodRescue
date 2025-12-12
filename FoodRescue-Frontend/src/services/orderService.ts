@@ -1,51 +1,120 @@
 import { apiClient } from './apiClient';
-
-export interface Order {
-    id: string;
-    foodId: string;
-    buyerId: string;
-    restaurantId: string;
-    quantity: number;
-    totalPrice: number;
-    status: 'pending' | 'confirmed' | 'ready' | 'picked-up' | 'cancelled';
-    pickupCode?: string;
-    createdAt: string;
-    updatedAt?: string;
-}
+import { BackendOrder, OrderListResponse, ApiResponse } from '../types/api';
 
 export interface CreateOrderData {
-    foodId: string;
+    productId: string;
     quantity: number;
+    dealId?: string;
+}
+
+export interface OrderFilters {
+    status?: 'pending' | 'confirmed' | 'ready' | 'completed' | 'cancelled';
+    page?: number;
+    limit?: number;
 }
 
 export const orderService = {
-    // Create order
-    async createOrder(orderData: CreateOrderData): Promise<Order> {
-        return apiClient.post<Order>('/orders', orderData);
+    /**
+     * Create new order
+     */
+    async createOrder(data: CreateOrderData): Promise<BackendOrder> {
+        const response = await apiClient.post<ApiResponse<BackendOrder>>('/orders', data);
+        return response.data!;
     },
 
-    // Get user's orders
-    async getUserOrders(userId: string): Promise<Order[]> {
-        return apiClient.get<Order[]>(`/orders/user/${userId}`);
+    /**
+     * Get user's orders
+     */
+    async getMyOrders(filters?: OrderFilters): Promise<{ orders: BackendOrder[]; pagination: any }> {
+        const queryParams = new URLSearchParams();
+        
+        if (filters) {
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    queryParams.append(key, value.toString());
+                }
+            });
+        }
+
+        const query = queryParams.toString();
+        const endpoint = query ? `/orders?${query}` : '/orders';
+        
+        const response = await apiClient.get<ApiResponse<OrderListResponse>>(endpoint);
+        return response.data || { orders: [], pagination: {} };
     },
 
-    // Get restaurant's orders
-    async getRestaurantOrders(restaurantId: string): Promise<Order[]> {
-        return apiClient.get<Order[]>(`/orders/restaurant/${restaurantId}`);
+    /**
+     * Get single order by ID
+     */
+    async getOrderById(id: string): Promise<BackendOrder> {
+        const response = await apiClient.get<ApiResponse<BackendOrder>>(`/orders/${id}`);
+        return response.data!;
     },
 
-    // Get order by ID
-    async getOrderById(id: string): Promise<Order> {
-        return apiClient.get<Order>(`/orders/${id}`);
+    /**
+     * Get restaurant's orders (seller only)
+     */
+    async getRestaurantOrders(filters?: OrderFilters): Promise<{ orders: BackendOrder[]; pagination: any }> {
+        const queryParams = new URLSearchParams();
+        
+        if (filters) {
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value !== undefined) {
+                    queryParams.append(key, value.toString());
+                }
+            });
+        }
+
+        const query = queryParams.toString();
+        const endpoint = query ? `/orders/restaurant/orders?${query}` : '/orders/restaurant/orders';
+        
+        const response = await apiClient.get<ApiResponse<OrderListResponse>>(endpoint);
+        return response.data || { orders: [], pagination: {} };
     },
 
-    // Update order status
-    async updateOrderStatus(id: string, status: Order['status']): Promise<Order> {
-        return apiClient.patch<Order>(`/orders/${id}/status`, { status });
+    /**
+     * Confirm order (seller)
+     */
+    async confirmOrder(orderId: string): Promise<BackendOrder> {
+        const response = await apiClient.patch<ApiResponse<BackendOrder>>(`/orders/${orderId}/confirm`);
+        return response.data!;
     },
 
-    // Cancel order
-    async cancelOrder(id: string): Promise<Order> {
-        return apiClient.patch<Order>(`/orders/${id}/cancel`, {});
+    /**
+     * Mark order as ready for pickup (seller)
+     */
+    async markOrderReady(orderId: string): Promise<BackendOrder> {
+        const response = await apiClient.patch<ApiResponse<BackendOrder>>(`/orders/${orderId}/ready`);
+        return response.data!;
     },
+
+    /**
+     * Complete order pickup
+     */
+    async completePickup(orderId: string, pickupCode?: string): Promise<BackendOrder> {
+        const response = await apiClient.patch<ApiResponse<BackendOrder>>(`/orders/${orderId}/complete`, {
+            pickupCode
+        });
+        return response.data!;
+    },
+
+    /**
+     * Cancel order
+     */
+    async cancelOrder(orderId: string, reason?: string): Promise<BackendOrder> {
+        const response = await apiClient.patch<ApiResponse<BackendOrder>>(`/orders/${orderId}/cancel`, {
+            reason
+        });
+        return response.data!;
+    },
+
+    /**
+     * Mark payment as successful (webhook)
+     */
+    async markPaymentSuccess(orderId: string, paymentReference: string): Promise<BackendOrder> {
+        const response = await apiClient.post<ApiResponse<BackendOrder>>(`/orders/${orderId}/payment-success`, {
+            paymentReference
+        });
+        return response.data!;
+    }
 };

@@ -24,38 +24,40 @@ export const foodService = {
         }
 
         const query = queryParams.toString();
-        const endpoint = query ? `/foods?${query}` : '/foods';
+        const endpoint = query ? `/products?${query}` : '/products';
         
-        return apiClient.get<Food[]>(endpoint);
+        // Backend returns { success, data: { products, pagination } }
+        const response = await apiClient.get<any>(endpoint);
+        return response.data?.products || [];
     },
 
     // Get food by ID
     async getFoodById(id: string): Promise<Food> {
-        return apiClient.get<Food>(`/foods/${id}`);
+        return apiClient.get<Food>(`/products/id/${id}`);
     },
 
     // Create new food (for restaurants/grocery stores)
     async createFood(foodData: Partial<Food>): Promise<Food> {
-        return apiClient.post<Food>('/foods', foodData);
+        return apiClient.post<Food>('/products', foodData);
     },
 
     // Update food
     async updateFood(id: string, foodData: Partial<Food>): Promise<Food> {
-        return apiClient.put<Food>(`/foods/${id}`, foodData);
+        return apiClient.put<Food>(`/products/${id}`, foodData);
     },
 
     // Delete food
     async deleteFood(id: string): Promise<void> {
-        return apiClient.delete<void>(`/foods/${id}`);
+        return apiClient.delete<void>(`/products/${id}`);
     },
 
     // Get nearby foods (geospatial query)
     async getNearbyFoods(lat: number, lng: number, radius: number = 5): Promise<Food[]> {
-        return apiClient.get<Food[]>(`/foods/nearby?lat=${lat}&lng=${lng}&radius=${radius}`);
+        return apiClient.get<Food[]>(`/products/nearby?lat=${lat}&lng=${lng}&radius=${radius}`);
     },
 
     // Get foods by restaurant
     async getFoodsByRestaurant(restaurantId: string): Promise<Food[]> {
-        return apiClient.get<Food[]>(`/foods/restaurant/${restaurantId}`);
+        return apiClient.get<Food[]>(`/products/restaurant/${restaurantId}`);
     },
 };

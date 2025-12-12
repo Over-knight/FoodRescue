@@ -11,7 +11,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <nav className="navbar">
                 <div className="container nav-content">
                     <Link to="/" className="logo">
-                        🍱 FoodRescue
+                        FoodRescue
                     </Link>
                     <div className="nav-links">
                         <Link
@@ -21,7 +21,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                             Browse
                         </Link>
 
-                        {user?.role === 'restaurant' && (
+                        {(user?.role === 'restaurant' || user?.role === 'seller' || user?.role === 'grocery' || user?.role === 'ngo') && (
                             <>
                                 <Link
                                     to="/dashboard"
@@ -33,7 +33,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                                     to="/analytics"
                                     className={`nav-link ${location.pathname === '/analytics' ? 'active' : ''}`}
                                 >
-                                    📊 Analytics
+                                    Analytics
                                 </Link>
                             </>
                         )}
@@ -47,7 +47,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                             </Link>
                         )}
 
-                        {(user?.role === 'consumer' || user?.role === 'ngo') && (
+                        {(user?.role === 'consumer' || user?.role === 'customer' || user?.role === 'ngo') && (
                             <Link
                                 to="/orders"
                                 className={`nav-link ${location.pathname === '/orders' ? 'active' : ''}`}

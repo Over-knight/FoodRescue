@@ -47,6 +47,9 @@ export const authService = {
     async login(credentials: LoginCredentials): Promise<AuthResponse> {
         const response = await apiClient.post<BackendAuthResponse>('/auth/login', credentials);
         const { token, user } = response.data;
+        
+        // Store user with backend role (seller/customer) as-is
+        // The dashboard checks for both 'seller' and 'restaurant'
         if (token) {
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
@@ -58,6 +61,9 @@ export const authService = {
     async signup(data: SignupData): Promise<AuthResponse> {
         const response = await apiClient.post<BackendAuthResponse>('/auth/signup', data);
         const { token, user } = response.data;
+        
+        // Store user with backend role (seller/customer) as-is
+        // The dashboard checks for both 'seller' and 'restaurant'
         if (token) {
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));

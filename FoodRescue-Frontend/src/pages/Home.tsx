@@ -3,6 +3,7 @@ import { foodService } from '../services/foodService';
 import { Food } from '../types';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Icons } from '../components/Icons';
 
 export const Home: React.FC = () => {
     const [foods, setFoods] = useState<Food[]>([]);
@@ -35,7 +36,7 @@ export const Home: React.FC = () => {
             <div style={{ marginBottom: '2rem' }}>
                 <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Food Near You</h1>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
-                    <span>📍</span>
+                    <Icons.MapPin size={16} />
                     <span>Lagos, Nigeria (Within 3km)</span>
                 </div>
             </div>
@@ -63,7 +64,7 @@ export const Home: React.FC = () => {
                         marginBottom: '-2px'
                     }}
                 >
-                    🍽️ All Items
+                    <Icons.UtensilsCrossed size={16} /> All Items
                 </button>
                 <button
                     onClick={() => setFilter('meals')}
@@ -80,7 +81,7 @@ export const Home: React.FC = () => {
                         marginBottom: '-2px'
                     }}
                 >
-                    🍱 Meals
+                    <Icons.Restaurant size={16} /> Meals
                 </button>
                 <button
                     onClick={() => setFilter('groceries')}
@@ -97,7 +98,7 @@ export const Home: React.FC = () => {
                         marginBottom: '-2px'
                     }}
                 >
-                    🛒 Groceries
+                    <Icons.ShoppingBag size={16} /> Groceries
                 </button>
             </div>
 
@@ -116,7 +117,9 @@ export const Home: React.FC = () => {
             {/* Loading State */}
             {loading && (
                 <div style={{ textAlign: 'center', padding: '3rem' }}>
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔄</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                        <Icons.Loader size={48} color="var(--primary)" />
+                    </div>
                     <p style={{ color: 'var(--text-muted)' }}>Loading delicious deals...</p>
                 </div>
             )}
@@ -137,7 +140,9 @@ export const Home: React.FC = () => {
             {/* Food Cards - Horizontal Layout */}
             {!loading && !error && foods.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '3rem' }}>
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🍽️</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                        <Icons.UtensilsCrossed size={48} color="var(--text-muted)" />
+                    </div>
                     <p style={{ color: 'var(--text-muted)' }}>No food items available at the moment.</p>
                 </div>
             )}
@@ -194,7 +199,7 @@ export const Home: React.FC = () => {
                                     alignItems: 'center',
                                     gap: '0.25rem'
                                 }}>
-                                    📍 {Math.floor(Math.random() * 5) + 1}.{Math.floor(Math.random() * 10)} km
+                                    <Icons.MapPin size={14} /> {Math.floor(Math.random() * 5) + 1}.{Math.floor(Math.random() * 10)} km
                                 </div>
                             </div>
 
@@ -212,11 +217,11 @@ export const Home: React.FC = () => {
                                     {/* Time and Quantity Info */}
                                     <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <span style={{ color: '#EF4444' }}>⏰</span>
+                                            <Icons.Clock size={14} color="#EF4444" />
                                             <span>{Math.floor(Math.random() * 12) + 1}h {Math.floor(Math.random() * 60)}m left</span>
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <span>📦</span>
+                                            <Icons.Package size={14} />
                                             <span>{food.quantity} left</span>
                                         </div>
                                     </div>
