@@ -15,11 +15,25 @@ export interface FoodFilters {
 const transformProductToFood = (product: BackendProduct | any): Food => {
     const priceInKobo = product.pricing?.retail?.price || 0;
     const priceInNaira = priceInKobo / 100;
-    
-    // Default discount logic (can be improved with real Deal data)
-    // For now, if no deal, discount = 0
-    const discountPercent = 0; 
-    const discountedPrice = priceInNaira;
+
+    // Calculate discount from deal if available
+    let discountPercent = 0;
+    let discountedPrice = priceInNaira;
+
+    if (product.deal || product.dealId) {
+        // If deal is populated, use its data
+        const deal = product.deal;
+        if (deal && typeof deal === 'object') {
+            if (deal.discountPercentage) {
+                discountPercent = deal.discountPercentage;
+                discountedPrice = priceInNaira * (1 - discountPercent / 100);
+            } else if (deal.dealPrice) {
+                const dealPriceInNaira = deal.dealPrice / 100;
+                discountedPrice = dealPriceInNaira;
+                discountPercent = Math.round(((priceInNaira - dealPriceInNaira) / priceInNaira) * 100);
+            }
+        }
+    }
 
     return {
         id: product._id,
@@ -27,8 +41,8 @@ const transformProductToFood = (product: BackendProduct | any): Food => {
         name: product.name,
         description: product.description || '',
         originalPrice: priceInNaira,
-        discountedPrice: discountedPrice,
-        discountPercent: discountPercent,
+        discountedPrice: Math.round(discountedPrice * 100) / 100, // Round to 2 decimal places
+        discountPercent: Math.max(0, Math.min(100, discountPercent)), // Ensure 0-100 range
         quantity: product.inventory?.availableStock || 0,
         quantityType: product.inventory?.unit || 'item',
         expiryTime: product.expiryDate || new Date().toISOString(),

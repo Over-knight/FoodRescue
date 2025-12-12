@@ -363,22 +363,12 @@ export const RestaurantDashboard: React.FC = () => {
                     <h2 style={{ marginBottom: '1.5rem' }}>Active Listings</h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {products.map(product => (
-                            <div key={product._id} className="card" style={{ padding: '1rem', display: 'flex', gap: '1rem' }}>
-                                <img
-                                    src={product.images[0] || 'https://via.placeholder.com/80'}
-                                    alt={product.name}
-                                    style={{ width: '80px', height: '80px', borderRadius: '0.5rem', objectFit: 'cover' }}
-                                />
-                                <div>
-                                    <h4 style={{ margin: '0 0 0.25rem 0' }}>{product.name}</h4>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                        {product.inventory.availableStock} left • {product.status}
-                                    </div>
-                                    <div style={{ marginTop: '0.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-                                        {koboToNaira(product.pricing.retail.price).toLocaleString('en-NG', { style: 'currency', currency: 'NGN' })}
-                                    </div>
-                                </div>
-                            </div>
+                            <ProductListItem
+                                key={product._id}
+                                product={product}
+                                onEdit={handleEditProduct}
+                                onDelete={handleDeleteProduct}
+                            />
                         ))}
                         {products.length === 0 && <p style={{ color: 'var(--text-muted)' }}>No active listings.</p>}
                     </div>
