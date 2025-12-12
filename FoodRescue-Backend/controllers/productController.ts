@@ -110,7 +110,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       .limit(limitNum)
       .lean();
 
-    // Attach active deal id to each product if available (helps clients include dealId when adding to cart)
+    // Attach active deal to each product if available
     const now = new Date();
     await Promise.all(products.map(async (product: any) => {
       try {
@@ -119,11 +119,14 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
           status: { $in: ['active'] },
           startAt: { $lte: now },
           $or: [ { endAt: { $exists: false } }, { endAt: null }, { endAt: { $gte: now } } ]
-        }).sort({ startAt: -1, createdAt: -1 });
+        })
+        .select('dealPrice discountPercentage title status startAt endAt')
+        .sort({ startAt: -1, createdAt: -1 })
+        .lean();
 
         if (activeDeal) {
           product.dealId = String(activeDeal._id);
-          product.deal = String(activeDeal._id);
+          product.deal = activeDeal; // Include full deal object
         }
       } catch (e) {
         console.error('Error attaching active deal to product list item:', e);
@@ -181,7 +184,7 @@ export const getProductBySlug = async (req: Request, res: Response): Promise<Res
       { $inc: { 'stats.viewCount': 1 } }
     ).catch(err => console.error('Failed to increment view count:', err));
 
-    // Attach active deal id if product is part of an active deal
+    // Attach active deal if product is part of an active deal
     try {
       const now2 = new Date();
       const activeDeal = await Deal.findOne({
@@ -189,13 +192,16 @@ export const getProductBySlug = async (req: Request, res: Response): Promise<Res
         status: { $in: ['active'] },
         startAt: { $lte: now2 },
         $or: [ { endAt: { $exists: false } }, { endAt: null }, { endAt: { $gte: now2 } } ]
-      }).sort({ startAt: -1, createdAt: -1 });
+      })
+      .select('dealPrice discountPercentage title status startAt endAt')
+      .sort({ startAt: -1, createdAt: -1 })
+      .lean();
 
       if (activeDeal) {
         // product is a mongoose document - convert to object for mutation consistency
         const pObj: any = typeof product.toObject === 'function' ? product.toObject() : product;
         pObj.dealId = String(activeDeal._id);
-        pObj.deal = String(activeDeal._id);
+        pObj.deal = activeDeal; // Include full deal object
         return res.json({
           success: true,
           data: pObj
