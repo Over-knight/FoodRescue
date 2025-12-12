@@ -35,12 +35,17 @@ export const RestaurantDashboard: React.FC = () => {
 
     const loadDashboardData = async () => {
         try {
+            console.log('Loading dashboard data...');
+
             // Load categories
             const cats = await categoryService.getAllCategories();
+            console.log('Categories loaded:', cats);
             setCategories(cats.filter(c => c.isActive));
+            console.log('Active categories:', cats.filter(c => c.isActive));
 
             // Load products
             const { products: prods } = await productService.getAllProducts();
+            console.log('Products loaded:', prods);
             setProducts(prods);
 
             // Load stats (optional - can be implemented later)
@@ -48,6 +53,8 @@ export const RestaurantDashboard: React.FC = () => {
             // setStats(statsData);
         } catch (err: any) {
             console.error('Error loading dashboard data:', err);
+            console.error('Error details:', err.message, err.response);
+            setError(err.message || 'Failed to load dashboard data');
         }
     };
 

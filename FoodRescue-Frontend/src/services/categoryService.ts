@@ -6,8 +6,8 @@ export const categoryService = {
      * Get all categories
      */
     async getAllCategories(): Promise<BackendCategory[]> {
-        const response = await apiClient.get<ApiResponse<BackendCategory[]>>('/categories');
-        return response.data || [];
+        const response = await apiClient.get<ApiResponse<{ categories: BackendCategory[], count: number }>>('/categories');
+        return response.data?.categories || [];
     },
 
     /**
