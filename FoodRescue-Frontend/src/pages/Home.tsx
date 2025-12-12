@@ -172,7 +172,7 @@ export const Home: React.FC = () => {
                     <p style={{ color: 'var(--text-muted)' }}>No food items available at the moment.</p>
                 </div>
             )}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1.5rem' }}>
                 {foods
                     .filter(food => {
                         // Filter based on selected tab
