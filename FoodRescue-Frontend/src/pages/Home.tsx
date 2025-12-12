@@ -174,8 +174,9 @@ export const Home: React.FC = () => {
             )}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                gap: '1.5rem'
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+                gap: '1.5rem',
+                width: '100%'
             }}>
                 {foods
                     .filter(food => {
