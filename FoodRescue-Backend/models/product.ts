@@ -315,7 +315,9 @@ ProductSchema.methods.updateStock = function(quantityOrdered: number, operation:
 ProductSchema.methods.canFulfillOrder = function(quantity: number, orderType: 'retail' | 'bulk'): boolean {
   const minQty = orderType === 'retail' ? this.pricing.retail.minQuantity : this.pricing.bulkTiers?.[0]?.minQuantity || 0;
   
-  return quantity >= minQty && this.inventory.availableStock >= quantity && this.status === 'active';
+  // Allow both 'active' and 'draft' for hackathon demo
+  const allowedStatuses = ['active', 'draft'];
+  return quantity >= minQty && this.inventory.availableStock >= quantity && allowedStatuses.includes(this.status);
 };
 
 export const Product = mongoose.model<IProduct>('Product', ProductSchema);
