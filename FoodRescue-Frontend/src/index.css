@@ -177,27 +177,27 @@ body {
   .navbar .container {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
+    max-width: 100% !important;
   }
 
   .nav-content {
     display: flex !important;
+    justify-content: space-between !important;
     align-items: center !important;
     width: 100% !important;
     gap: 0 !important;
-    position: relative !important;
   }
 
   .logo {
-    flex-shrink: 0 !important;
-    margin-right: auto !important;
+    flex: 0 0 auto !important;
   }
 
   .mobile-menu-toggle {
     display: block !important;
     z-index: 101 !important;
+    flex: 0 0 auto !important;
     margin-left: auto !important;
-    flex-shrink: 0 !important;
-    position: relative !important;
+    padding: 0.5rem !important;
   }
 
   .nav-links {
