@@ -80,14 +80,15 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
 
       const quantity = item.quantity;
 
+      // HACKATHON: Temporarily disabled stock/minQuantity check
       // Check stock availability
-      if (!product.canFulfillOrder(quantity, orderType)) {
-        res.status(400).json({
-          success: false,
-          message: `Product "${product.name}" cannot fulfill order. Check stock and minimum quantity.`
-        });
-        return;
-      }
+      // if (!product.canFulfillOrder(quantity, orderType)) {
+      //   res.status(400).json({
+      //     success: false,
+      //     message: `Product "${product.name}" cannot fulfill order. Check stock and minimum quantity.`
+      //   });
+      //   return;
+      // }
 
       // Determine price based on order type
       let unitPrice: number;
