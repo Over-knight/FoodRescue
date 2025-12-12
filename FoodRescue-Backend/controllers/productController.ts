@@ -390,11 +390,11 @@ export const searchProducts = async (req: Request, res: Response): Promise<void>
   }
 };
 
-// POST /api/products - Create product (admin only)
+// POST /api/products - Create product (seller/admin only)
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
    console.log('CreateProduct function hit!');
-  console.log('Files:', req.files);
-  console.log('Body:', req.body);
+  // console.log('Files:', req.files);
+  // console.log('Body:', req.body);
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -404,6 +404,15 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
         errors: errors.array()
       });
       return;
+    }
+
+    // Verify user is authenticated
+    if (!req.user || !req.user._id) {
+        res.status(401).json({
+          success: false,
+          message: 'Authentication required'
+        });
+        return;
     }
 
     const uploadedImages = req.files as Express.Multer.File[];
@@ -424,6 +433,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       pricing,
       inventory,
       tags,
+      expiryDate,
       status = 'draft'
     } = req.body;
 
@@ -446,11 +456,9 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       return;
     }
       
-    
     //Image validation
     const imageValidation = validateProductImages(images);
     if (!imageValidation.valid) {
-
       if (images.length > 0) await deleteMultipleImages(images);
       res.status(400).json({
         success: false,
@@ -462,8 +470,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     // Verify category exists
     const categoryDoc = await Category.findById(category);
     if (!categoryDoc) {
-
-      if (images.length > 0) await deleteMultipleImages
+      if (images.length > 0) await deleteMultipleImages(images);
       res.status(400).json({
         success: false,
         message: 'Invalid category ID'
@@ -473,17 +480,30 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
 
     // Check if product name already exists
     const existingProduct = await Product.findOne({
-      name: { $regex: new RegExp(`^${name}$`, 'i') }
+      name: { $regex: new RegExp(`^${name}$`, 'i') },
+      restaurant: req.user._id // Scope name check to this restaurant only? Or global? Assuming global for now to avoid confusion, or properly scoped.
+      // Ideally name uniqueness should be per restaurant or global. 
+      // The original check was global. Let's keep it global for now but typically unique names are per store?
+      // Actually, original code didn't filter by restaurant. Let's stick closer to original but add restaurant field.
     });
 
     if (existingProduct) {
-
       if (images.length > 0) await deleteMultipleImages(images);
       res.status(409).json({
         success: false,
         message: 'Product with this name already exists'
       });
       return;
+    }
+
+    // Validate Expiry Date
+    if (!expiryDate) {
+         if (images.length > 0) await deleteMultipleImages(images);
+         res.status(400).json({
+            success: false,
+            message: 'Expiry date is required'
+         });
+         return;
     }
 
     const product = new Product({
@@ -494,7 +514,9 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       pricing,
       inventory,
       tags: tags || [],
-      status
+      status,
+      restaurant: req.user._id, // Add authenticated user as seller
+      expiryDate: new Date(expiryDate)
     });
 
     await product.save();
@@ -513,16 +535,27 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       message: 'Product created successfully',
       data: product
     });
-  } catch (error) {
-
+  } catch (error: any) {
     const uploadedImages = req.files as Express.Multer.File[];
-    if (uploadedImages.length > 0) {
-      await deleteMultipleImages(uploadedImages.map(f => f.path))
+    if (uploadedImages && uploadedImages.length > 0) {
+      await deleteMultipleImages(uploadedImages.map(f => f.path)).catch(console.error);
     }
     console.error('Create product error:', error);
+    
+    // Send more specific error message if it's a validation error
+    if (error.name === 'ValidationError') {
+        res.status(400).json({
+            success: false,
+            message: 'Validation failed',
+            errors: Object.values(error.errors).map((err: any) => err.message)
+        });
+        return;
+    }
+
     res.status(500).json({
       success: false,
-      message: 'Failed to create product'
+      message: 'Failed to create product',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };
