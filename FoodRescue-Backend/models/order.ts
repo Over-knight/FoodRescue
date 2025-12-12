@@ -208,20 +208,19 @@ OrderSchema.index({ orderNumber: 1 }, { unique: true });
 OrderSchema.index({ pickupCode: 1, restaurant: 1 });
 
 // Generate order number and pickup code before validation
-OrderSchema.pre('validate', function(next) {
+OrderSchema.pre('validate', function() {
   if (this.isNew) {
     // Generate order number
-    if (!this.orderNumber) {
+    if (!(this as any).orderNumber) {
       const timestamp = Date.now().toString(36).toUpperCase();
       const random = Math.random().toString(36).substring(2, 6).toUpperCase();
       (this as any).orderNumber = `FR-${timestamp}-${random}`;
     }
     // Generate 4-digit pickup code
-    if (!this.pickupCode) {
+    if (!(this as any).pickupCode) {
       (this as any).pickupCode = Math.floor(1000 + Math.random() * 9000).toString();
     }
   }
-  next();
 });
 
 // Virtual: Check if order is pickup ready
