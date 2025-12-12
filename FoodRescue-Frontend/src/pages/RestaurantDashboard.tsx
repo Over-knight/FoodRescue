@@ -168,8 +168,8 @@ export const RestaurantDashboard: React.FC = () => {
         setProducts(products.filter(p => p._id !== productId));
     };
 
-    if (!user || (user.role !== 'seller' && user.role !== 'restaurant')) {
-        return <div>Access Denied. Please login as a restaurant.</div>;
+    if (!user || !['seller', 'restaurant', 'grocery', 'ngo'].includes(user.role)) {
+        return <div>Access Denied. Please login as a restaurant, grocery store, or NGO.</div>;
     }
 
     return (
