@@ -262,14 +262,19 @@ export const Home: React.FC = () => {
 
                                 {/* Price Section */}
                                 <div style={{ marginBottom: '1rem', marginTop: 'auto' }}>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-                                        ₦{food.discountedPrice.toLocaleString()}
-                                    </div>
                                     {food.discountPercent > 0 && (
-                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                                        <div style={{
+                                            fontSize: '0.9rem',
+                                            color: 'var(--text-muted)',
+                                            textDecoration: 'line-through',
+                                            marginBottom: '0.25rem'
+                                        }}>
                                             ₦{food.originalPrice.toLocaleString()}
                                         </div>
                                     )}
+                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+                                        ₦{food.discountedPrice.toLocaleString()}
+                                    </div>
                                 </div>
 
                                 {/* Button */}

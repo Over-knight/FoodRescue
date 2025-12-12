@@ -337,6 +337,73 @@ export const Signup: React.FC = () => {
                         </>
                     )}
 
+                    {/* Grocery Store Form */}
+                    {role === 'grocery' && (
+                        <>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>Store Name</label>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        type="text"
+                                        name="organizationName"
+                                        value={formData.organizationName}
+                                        onChange={handleChange}
+                                        required
+                                        style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                        placeholder="Lagos Fresh Market"
+                                    />
+                                </div>
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>Owner Name</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }}>👤</span>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            required
+                                            style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                            placeholder="John Doe"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>Phone Number</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <span style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }}>📱</span>
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            value={formData.phone}
+                                            onChange={handleChange}
+                                            required
+                                            style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                            placeholder="+234..."
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>Store Address</label>
+                                <div style={{ position: 'relative' }}>
+                                    <input
+                                        type="text"
+                                        name="address"
+                                        value={formData.address}
+                                        onChange={handleChange}
+                                        required
+                                        style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB', fontSize: '0.95rem' }}
+                                        placeholder="10 Balogun Street, Lagos"
+                                    />
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+
                     {/* Common Fields */}
                     <div>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>Email Address</label>
