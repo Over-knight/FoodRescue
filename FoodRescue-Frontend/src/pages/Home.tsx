@@ -172,7 +172,7 @@ export const Home: React.FC = () => {
                     <p style={{ color: 'var(--text-muted)' }}>No food items available at the moment.</p>
                 </div>
             )}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>
                 {foods
                     .filter(food => {
                         // Filter based on selected tab
@@ -189,27 +189,30 @@ export const Home: React.FC = () => {
                     })
                     .map(food => (
                         <div key={food.id} className="card" style={{
-                            display: 'grid',
-                            gridTemplateColumns: '300px 1fr',
+                            display: 'flex',
+                            flexDirection: 'column',
                             overflow: 'hidden',
-                            transition: 'transform 0.2s, box-shadow 0.2s'
+                            transition: 'transform 0.2s, box-shadow 0.2s',
+                            cursor: 'pointer'
                         }}>
                             {/* Image Section */}
-                            <div style={{ position: 'relative', height: '200px' }}>
+                            <div style={{ position: 'relative', height: '200px', overflow: 'hidden' }}>
                                 <img
                                     src={food.image}
                                     alt={food.name}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                                 {food.discountPercent > 0 && (
-                                    <span className="badge badge-discount" style={{
+                                    <span style={{
                                         position: 'absolute',
-                                        top: '1rem',
-                                        right: '1rem',
-                                        background: 'var(--primary)',
+                                        top: '0.75rem',
+                                        right: '0.75rem',
+                                        background: '#FF6B35',
                                         color: 'white',
-                                        fontSize: '0.9rem',
-                                        padding: '0.5rem 1rem'
+                                        fontSize: '0.85rem',
+                                        fontWeight: 'bold',
+                                        padding: '0.4rem 0.8rem',
+                                        borderRadius: '0.5rem'
                                     }}>
                                         -{food.discountPercent}% OFF
                                     </span>
@@ -217,52 +220,65 @@ export const Home: React.FC = () => {
                             </div>
 
                             {/* Details Section */}
-                            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                                <div>
-                                    <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem' }}>{food.name}</h3>
-                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '0 0 0.5rem 0' }}>
-                                        {food.category || 'Food Item'}
-                                    </p>
-                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '0 0 1rem 0' }}>
-                                        {food.description}
-                                    </p>
+                            <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                                <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.1rem', fontWeight: 'bold' }}>
+                                    {food.name}
+                                </h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: '0 0 0.75rem 0' }}>
+                                    {food.category || 'Food Item'}
+                                </p>
+                                <p style={{
+                                    color: 'var(--text-muted)',
+                                    fontSize: '0.875rem',
+                                    margin: '0 0 1rem 0',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    lineHeight: '1.4'
+                                }}>
+                                    {food.description}
+                                </p>
 
-                                    {/* Time and Quantity Info */}
-                                    <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <Icons.Clock size={14} color="#EF4444" />
-                                            <span>{getTimeRemaining(food.expiryTime)}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                            <Icons.Package size={14} />
-                                            <span>{food.quantity} {food.quantityType} left</span>
-                                        </div>
+                                {/* Time and Quantity Info */}
+                                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                        <Icons.Clock size={14} color="#EF4444" />
+                                        <span>{getTimeRemaining(food.expiryTime)}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                        <Icons.Package size={14} />
+                                        <span>{food.quantity} {food.quantityType} left</span>
                                     </div>
                                 </div>
 
-                                {/* Price and Button */}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
-                                    <div>
-                                        {food.discountPercent > 0 && (
-                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                                                ₦{food.originalPrice.toLocaleString()}
-                                            </div>
-                                        )}
-                                        <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-                                            ₦{food.discountedPrice.toLocaleString()}
-                                        </div>
+                                {/* Price Section */}
+                                <div style={{ marginBottom: '1rem', marginTop: 'auto' }}>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+                                        ₦{food.discountedPrice.toLocaleString()}
                                     </div>
-                                    <Link
-                                        to={`/checkout/${food.id}`}
-                                        className="btn btn-primary"
-                                        style={{
-                                            padding: '0.75rem 2rem',
-                                            textDecoration: 'none'
-                                        }}
-                                    >
-                                        Rescue Meal
-                                    </Link>
+                                    {food.discountPercent > 0 && (
+                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                                            ₦{food.originalPrice.toLocaleString()}
+                                        </div>
+                                    )}
                                 </div>
+
+                                {/* Button */}
+                                <Link
+                                    to={`/checkout/${food.id}`}
+                                    className="btn btn-primary"
+                                    style={{
+                                        padding: '0.75rem 1rem',
+                                        textDecoration: 'none',
+                                        textAlign: 'center',
+                                        width: '100%',
+                                        display: 'block'
+                                    }}
+                                >
+                                    Rescue Meal
+                                </Link>
                             </div>
                         </div>
                     ))}
