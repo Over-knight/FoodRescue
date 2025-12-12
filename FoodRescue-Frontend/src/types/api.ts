@@ -220,6 +220,87 @@ export interface TopProduct {
 }
 
 /**
+ * Analytics API Response Types (matching backend structure)
+ */
+
+// GET /api/analytics/restaurant/overview
+export interface RestaurantOverviewData {
+  totalOrders: number;
+  totalRevenue: number; // in naira (already converted from kobo)
+  totalMealsSaved: number;
+  totalProducts: number;
+  pendingOrders: number;
+  avgRating: number;
+  today: {
+    orders: number;
+    revenue: number; // in naira
+  };
+}
+
+// GET /api/analytics/restaurant/sales
+export interface SalesData {
+  period: string | number;
+  revenue: number; // in naira
+  orders: number;
+  mealsSaved: number;
+}
+
+export interface RestaurantSalesData {
+  period: string; // 'daily' | 'weekly' | 'monthly'
+  sales: SalesData[];
+}
+
+// GET /api/analytics/restaurant/products
+export interface TopProductData {
+  productId: string;
+  name: string;
+  slug: string;
+  image: string;
+  totalQuantity: number;
+  totalRevenue: number; // in naira
+  orderCount: number;
+}
+
+export interface TopProductsData {
+  products: TopProductData[];
+}
+
+// GET /api/analytics/restaurant/revenue
+export interface CategoryRevenueData {
+  categoryId: string;
+  categoryName: string;
+  totalRevenue: number; // in naira
+  orderCount: number;
+  itemsSold: number;
+}
+
+export interface RevenueByCategoryData {
+  categories: CategoryRevenueData[];
+}
+
+// GET /api/analytics/restaurant/waste
+export interface WasteReductionOverview {
+  totalMealsSaved: number;
+  weightSaved: number; // in kg
+  co2Saved: number; // in kg
+  waterSaved: number; // in liters
+  moneySavedByCustomers: number; // in naira
+}
+
+export interface MonthlyWasteData {
+  month: string; // 'YYYY-MM'
+  mealsSaved: number;
+  weightSaved: number; // in kg
+  co2Saved: number; // in kg
+}
+
+export interface WasteReductionData {
+  overview: WasteReductionOverview;
+  monthly: MonthlyWasteData[];
+}
+
+
+/**
  * Notification Response Types
  */
 export interface BackendNotification {

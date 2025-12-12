@@ -1,5 +1,6 @@
 import { apiClient } from './apiClient';
 import { Food } from '../types';
+import { BackendProduct } from '../types/api';
 
 export interface FoodFilters {
     category?: string;
@@ -9,6 +10,34 @@ export interface FoodFilters {
     lng?: number;
     radius?: number; // in km
 }
+
+// Helper: Transform Backend Data to Frontend Model
+const transformProductToFood = (product: BackendProduct | any): Food => {
+    const priceInKobo = product.pricing?.retail?.price || 0;
+    const priceInNaira = priceInKobo / 100;
+    
+    // Default discount logic (can be improved with real Deal data)
+    // For now, if no deal, discount = 0
+    const discountPercent = 0; 
+    const discountedPrice = priceInNaira;
+
+    return {
+        id: product._id,
+        restaurantId: product.restaurant?._id || product.restaurant || '', // Handle population
+        name: product.name,
+        description: product.description || '',
+        originalPrice: priceInNaira,
+        discountedPrice: discountedPrice,
+        discountPercent: discountPercent,
+        quantity: product.inventory?.availableStock || 0,
+        quantityType: product.inventory?.unit || 'item',
+        expiryTime: product.expiryDate || new Date().toISOString(),
+        image: product.images?.[0] || 'https://via.placeholder.com/150',
+        category: product.category?.name || 'General',
+        tags: product.tags || [],
+        status: product.status === 'active' ? 'active' : 'completed' // Map status
+    };
+};
 
 export const foodService = {
     // Get all foods with optional filters
@@ -28,12 +57,15 @@ export const foodService = {
         
         // Backend returns { success, data: { products, pagination } }
         const response = await apiClient.get<any>(endpoint);
-        return response.data?.products || [];
+        const products = response.data?.products || [];
+        
+        return products.map(transformProductToFood);
     },
 
     // Get food by ID
     async getFoodById(id: string): Promise<Food> {
-        return apiClient.get<Food>(`/products/id/${id}`);
+        const response = await apiClient.get<any>(`/products/id/${id}`);
+        return transformProductToFood(response.data);
     },
 
     // Create new food (for restaurants/grocery stores)
@@ -53,11 +85,15 @@ export const foodService = {
 
     // Get nearby foods (geospatial query)
     async getNearbyFoods(lat: number, lng: number, radius: number = 5): Promise<Food[]> {
-        return apiClient.get<Food[]>(`/products/nearby?lat=${lat}&lng=${lng}&radius=${radius}`);
+        const response = await apiClient.get<any>(`/products/nearby?lat=${lat}&lng=${lng}&radius=${radius}`);
+        const products = response.data?.products || [];
+        return products.map(transformProductToFood);
     },
 
     // Get foods by restaurant
     async getFoodsByRestaurant(restaurantId: string): Promise<Food[]> {
-        return apiClient.get<Food[]>(`/products/restaurant/${restaurantId}`);
+        const response = await apiClient.get<any>(`/products/restaurant/${restaurantId}`);
+        const products = response.data?.products || [];
+        return products.map(transformProductToFood);
     },
 };

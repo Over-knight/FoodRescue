@@ -22,6 +22,8 @@ export const RestaurantDashboard: React.FC = () => {
         quantity: '',
         category: '',
         tags: '',
+        expiryDate: '', // Add expiryDate
+        unit: '', // Add unit
     });
 
     const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -96,6 +98,9 @@ export const RestaurantDashboard: React.FC = () => {
             if (imageFiles.length === 0) {
                 throw new Error('Please upload at least one image');
             }
+            if (!formData.expiryDate) {
+                throw new Error('Please select an expiry date');
+            }
 
             // Create product
             const newProduct = await productService.createProduct({
@@ -104,7 +109,9 @@ export const RestaurantDashboard: React.FC = () => {
                 category: formData.category,
                 originalPrice: Number(formData.originalPrice),
                 quantity: Number(formData.quantity),
+                unit: formData.unit || 'portion',
                 tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
+                expiryDate: new Date(formData.expiryDate).toISOString(), // Send as ISO string
                 status: 'active',
                 images: imageFiles
             });
@@ -122,6 +129,8 @@ export const RestaurantDashboard: React.FC = () => {
                 quantity: '',
                 category: '',
                 tags: '',
+                expiryDate: '',
+                unit: '',
             });
             setImageFiles([]);
             setImagePreviews([]);
@@ -243,15 +252,40 @@ export const RestaurantDashboard: React.FC = () => {
                                 )}
                             </div>
 
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Quantity</label>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Quantity</label>
+                                    <input
+                                        type="number"
+                                        value={formData.quantity}
+                                        onChange={e => setFormData({ ...formData, quantity: e.target.value })}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB' }}
+                                        required
+                                        min="1"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Unit</label>
+                                    <input
+                                        type="text"
+                                        value={formData.unit}
+                                        onChange={e => setFormData({ ...formData, unit: e.target.value })}
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB' }}
+                                        placeholder="e.g. plate, box"
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Expiry Date</label>
                                 <input
-                                    type="number"
-                                    value={formData.quantity}
-                                    onChange={e => setFormData({ ...formData, quantity: e.target.value })}
+                                    type="datetime-local"
+                                    value={formData.expiryDate}
+                                    onChange={e => setFormData({ ...formData, expiryDate: e.target.value })}
                                     style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #D1D5DB' }}
                                     required
-                                    min="1"
+                                    min={new Date().toISOString().slice(0, 16)}
                                 />
                             </div>
 

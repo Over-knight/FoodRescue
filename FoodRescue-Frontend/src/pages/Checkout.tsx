@@ -1,40 +1,75 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getFoodById, createOrder, MOCK_USERS } from '../services/mockData';
-import { Food, Order } from '../types';
+import { foodService } from '../services/foodService';
+import { orderService } from '../services/orderService';
+import { Food } from '../types';
+import { BackendOrder } from '../types/api';
 
 export const Checkout: React.FC = () => {
     const { foodId } = useParams<{ foodId: string }>();
     const [food, setFood] = useState<Food | undefined>();
-    const [loading, setLoading] = useState(false);
-    const [order, setOrder] = useState<Order | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [processingPayment, setProcessingPayment] = useState(false);
+    const [order, setOrder] = useState<BackendOrder | null>(null);
     const [quantity, setQuantity] = useState(1);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (foodId) {
-            setFood(getFoodById(foodId));
-        }
+        const fetchFood = async () => {
+            if (foodId) {
+                try {
+                    setLoading(true);
+                    const data = await foodService.getFoodById(foodId);
+                    setFood(data);
+                } catch (err) {
+                    setError('Failed to load product details.');
+                    console.error(err);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+        fetchFood();
     }, [foodId]);
 
-    const handlePayment = () => {
-        setLoading(true);
-        // Simulate Paystack Payment Delay
-        setTimeout(() => {
-            if (food) {
-                const newOrder = createOrder({
-                    foodId: food.id,
-                    buyerId: MOCK_USERS[0].id,
-                    restaurantId: food.restaurantId,
-                    quantity: quantity,
-                    totalPrice: food.discountedPrice * quantity
-                });
-                setOrder(newOrder);
-                setLoading(false);
-            }
-        }, 2000);
+    const handlePayment = async () => {
+        if (!food) return;
+
+        setProcessingPayment(true);
+        try {
+            // Simulate Paystack Payment Delay for UX
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            const newOrder = await orderService.createOrder({
+                productId: food.id,
+                quantity: quantity
+            });
+
+            setOrder(newOrder);
+        } catch (err) {
+            console.error('Payment/Order failed:', err);
+            alert('Failed to process order. Please try again.');
+        } finally {
+            setProcessingPayment(false);
+        }
     };
 
-    if (!food) return <div>Loading...</div>;
+    if (loading) {
+        return (
+            <div style={{ padding: '4rem', textAlign: 'center' }}>
+                <h2>Loading Checkout...</h2>
+            </div>
+        );
+    }
+
+    if (error || !food) {
+        return (
+            <div style={{ padding: '4rem', textAlign: 'center', color: 'red' }}>
+                <h2>{error || 'Product not found'}</h2>
+                <Link to="/" className="btn btn-primary" style={{ marginTop: '1rem', display: 'inline-block' }}>Back to Home</Link>
+            </div>
+        );
+    }
 
     if (order) {
         return (
@@ -56,10 +91,11 @@ export const Checkout: React.FC = () => {
                         color: 'var(--text-main)',
                         marginBottom: '2rem'
                     }}>
-                        {order.pickupCode}
+                        {order.pickupCode || 'PENDING'}
                     </div>
 
                     <Link to="/" className="btn btn-outline">Back to Home</Link>
+                    <Link to="/orders" className="btn btn-primary" style={{ marginLeft: '1rem' }}>View Orders</Link>
                 </div>
             </div>
         );
@@ -87,7 +123,7 @@ export const Checkout: React.FC = () => {
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                         <span>Price per portion</span>
-                        <span>₦{food.discountedPrice}</span>
+                        <span>₦{food.discountedPrice.toLocaleString()}</span>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
@@ -107,7 +143,7 @@ export const Checkout: React.FC = () => {
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem', fontWeight: 'bold' }}>
                         <span>Total</span>
-                        <span>₦{food.discountedPrice * quantity}</span>
+                        <span>₦{(food.discountedPrice * quantity).toLocaleString()}</span>
                     </div>
                 </div>
             </div>
@@ -123,9 +159,9 @@ export const Checkout: React.FC = () => {
                         onClick={handlePayment}
                         className="btn btn-primary"
                         style={{ width: '100%' }}
-                        disabled={loading}
+                        disabled={processingPayment}
                     >
-                        {loading ? 'Processing...' : `Pay ₦${food.discountedPrice * quantity}`}
+                        {processingPayment ? 'Processing...' : `Pay ₦${(food.discountedPrice * quantity).toLocaleString()}`}
                     </button>
 
                     <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.8rem', color: '#9CA3AF' }}>

@@ -21,13 +21,16 @@ export interface CreateProductData {
     category: string;
     originalPrice: number; // in Naira
     quantity: number;
+    unit?: string; // e.g., "plate", "pack", "kg"
     lowStockThreshold?: number;
     tags?: string[];
+    expiryDate: string; // ISO Date string
     status?: 'draft' | 'active';
     images: File[];
 }
 
 export interface UpdateProductData {
+// ... existing UpdateProductData ...
     name?: string;
     description?: string;
     category?: string;
@@ -109,12 +112,17 @@ export const productService = {
         formData.append('description', data.description);
         formData.append('category', data.category);
         formData.append('status', data.status || 'draft');
+        formData.append('expiryDate', data.expiryDate);
         
+        const unit = data.unit || 'portion'; // Default unit if not provided
+
         // Add pricing (convert Naira to kobo)
         const pricing = {
             retail: {
                 price: nairaToKobo(data.originalPrice),
-                currency: 'NGN'
+                currency: 'NGN',
+                unit: unit,
+                minQuantity: 1 // Default minimum quantity
             }
         };
         formData.append('pricing', JSON.stringify(pricing));
@@ -122,7 +130,8 @@ export const productService = {
         // Add inventory
         const inventory = {
             availableStock: data.quantity,
-            lowStockThreshold: data.lowStockThreshold || Math.floor(data.quantity * 0.2)
+            lowStockThreshold: data.lowStockThreshold || Math.floor(data.quantity * 0.2),
+            unit: unit
         };
         formData.append('inventory', JSON.stringify(inventory));
         

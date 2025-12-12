@@ -175,17 +175,19 @@ export const Home: React.FC = () => {
                                     alt={food.name}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
-                                <span className="badge badge-discount" style={{
-                                    position: 'absolute',
-                                    top: '1rem',
-                                    right: '1rem',
-                                    background: 'var(--primary)',
-                                    color: 'white',
-                                    fontSize: '0.9rem',
-                                    padding: '0.5rem 1rem'
-                                }}>
-                                    -{food.discountPercent}% OFF
-                                </span>
+                                {food.discountPercent > 0 && (
+                                    <span className="badge badge-discount" style={{
+                                        position: 'absolute',
+                                        top: '1rem',
+                                        right: '1rem',
+                                        background: 'var(--primary)',
+                                        color: 'white',
+                                        fontSize: '0.9rem',
+                                        padding: '0.5rem 1rem'
+                                    }}>
+                                        -{food.discountPercent}% OFF
+                                    </span>
+                                )}
                                 <div style={{
                                     position: 'absolute',
                                     bottom: '1rem',
@@ -228,13 +230,15 @@ export const Home: React.FC = () => {
                                 </div>
 
                                 {/* Price and Button */}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
                                     <div>
-                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                                            ₦{food.originalPrice}
-                                        </div>
+                                        {food.discountPercent > 0 && (
+                                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                                                ₦{food.originalPrice.toLocaleString()}
+                                            </div>
+                                        )}
                                         <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--primary)' }}>
-                                            ₦{food.discountedPrice}
+                                            ₦{food.discountedPrice.toLocaleString()}
                                         </div>
                                     </div>
                                     <Link

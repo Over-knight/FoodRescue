@@ -18,7 +18,14 @@ export const orderService = {
      * Create new order
      */
     async createOrder(data: CreateOrderData): Promise<BackendOrder> {
-        const response = await apiClient.post<ApiResponse<BackendOrder>>('/orders', data);
+        const payload = {
+            items: [{
+                productId: data.productId,
+                quantity: data.quantity
+            }],
+            orderType: 'retail' // Default to retail for single item rescue
+        };
+        const response = await apiClient.post<ApiResponse<BackendOrder>>('/orders', payload);
         return response.data!;
     },
 
