@@ -172,7 +172,12 @@ export const Home: React.FC = () => {
                     <p style={{ color: 'var(--text-muted)' }}>No food items available at the moment.</p>
                 </div>
             )}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.5rem' }}>
+            <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '1.5rem',
+                width: '100%'
+            }}>
                 {foods
                     .filter(food => {
                         // Filter based on selected tab
@@ -193,7 +198,10 @@ export const Home: React.FC = () => {
                             flexDirection: 'column',
                             overflow: 'hidden',
                             transition: 'transform 0.2s, box-shadow 0.2s',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            flex: '1 1 calc(33.333% - 1rem)', // 3 cards per row
+                            minWidth: '280px', // Minimum card width
+                            maxWidth: '400px' // Maximum card width
                         }}>
                             {/* Image Section */}
                             <div style={{ position: 'relative', height: '200px', overflow: 'hidden' }}>
