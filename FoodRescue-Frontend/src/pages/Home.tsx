@@ -173,10 +173,9 @@ export const Home: React.FC = () => {
                 </div>
             )}
             <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '1.5rem',
-                width: '100%'
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                gap: '1.5rem'
             }}>
                 {foods
                     .filter(food => {
@@ -198,16 +197,16 @@ export const Home: React.FC = () => {
                             flexDirection: 'column',
                             overflow: 'hidden',
                             transition: 'transform 0.2s, box-shadow 0.2s',
-                            cursor: 'pointer',
-                            flex: '1 1 calc(33.333% - 1rem)', // 3 cards per row
-                            minWidth: '280px', // Minimum card width
-                            maxWidth: '400px' // Maximum card width
+                            cursor: 'pointer'
                         }}>
                             {/* Image Section */}
                             <div style={{ position: 'relative', height: '200px', overflow: 'hidden' }}>
                                 <img
-                                    src={food.image}
+                                    src={food.image || 'https://via.placeholder.com/400x200?text=No+Image'}
                                     alt={food.name}
+                                    onError={(e) => {
+                                        e.currentTarget.src = 'https://via.placeholder.com/400x200?text=No+Image';
+                                    }}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                                 {food.discountPercent > 0 && (
