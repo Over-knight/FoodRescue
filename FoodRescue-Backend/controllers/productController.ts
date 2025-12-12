@@ -434,7 +434,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       inventory,
       tags,
       expiryDate,
-      status = 'draft'
+      status = 'active'  // Changed from 'draft' to allow immediate orders
     } = req.body;
 
     // Parse JSON strings from form-data with safety wrapper
