@@ -5,6 +5,23 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Icons } from '../components/Icons';
 
+// Helper: Calculate time remaining until expiry
+const getTimeRemaining = (expiryTime: string) => {
+    const now = new Date().getTime();
+    const expiry = new Date(expiryTime).getTime();
+    const diff = expiry - now;
+
+    if (diff <= 0) return 'Expired';
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (hours > 0) {
+        return `${hours}h ${minutes}m left`;
+    }
+    return `${minutes}m left`;
+};
+
 export const Home: React.FC = () => {
     const [foods, setFoods] = useState<Food[]>([]);
     const [filter, setFilter] = useState<'all' | 'meals' | 'groceries'>('all');
@@ -188,21 +205,6 @@ export const Home: React.FC = () => {
                                         -{food.discountPercent}% OFF
                                     </span>
                                 )}
-                                <div style={{
-                                    position: 'absolute',
-                                    bottom: '1rem',
-                                    left: '1rem',
-                                    background: 'rgba(0,0,0,0.7)',
-                                    color: 'white',
-                                    padding: '0.25rem 0.75rem',
-                                    borderRadius: '0.5rem',
-                                    fontSize: '0.85rem',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.25rem'
-                                }}>
-                                    <Icons.MapPin size={14} /> {Math.floor(Math.random() * 5) + 1}.{Math.floor(Math.random() * 10)} km
-                                </div>
                             </div>
 
                             {/* Details Section */}
@@ -210,7 +212,7 @@ export const Home: React.FC = () => {
                                 <div>
                                     <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem' }}>{food.name}</h3>
                                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '0 0 0.5rem 0' }}>
-                                        Mama Put Lagos
+                                        {food.category || 'Food Item'}
                                     </p>
                                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', margin: '0 0 1rem 0' }}>
                                         {food.description}
@@ -220,11 +222,11 @@ export const Home: React.FC = () => {
                                     <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                             <Icons.Clock size={14} color="#EF4444" />
-                                            <span>{Math.floor(Math.random() * 12) + 1}h {Math.floor(Math.random() * 60)}m left</span>
+                                            <span>{getTimeRemaining(food.expiryTime)}</span>
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                             <Icons.Package size={14} />
-                                            <span>{food.quantity} left</span>
+                                            <span>{food.quantity} {food.quantityType} left</span>
                                         </div>
                                     </div>
                                 </div>
