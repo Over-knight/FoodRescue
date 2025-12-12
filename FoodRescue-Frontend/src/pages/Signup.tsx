@@ -6,7 +6,7 @@ import { authService } from '../services/authService';
 export const Signup: React.FC = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
-    const [role, setRole] = useState<'consumer' | 'restaurant' | 'grocery' | 'ngo'>('consumer');
+    const [role, setRole] = useState<'consumer' | 'restaurant' | 'stores' | 'ngo'>('consumer');
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -41,7 +41,7 @@ export const Signup: React.FC = () => {
             });
 
             // Use window.location to force page reload and AuthContext update
-            if (role === 'restaurant' || role === 'grocery') {
+            if (role === 'restaurant' || role === 'stores') {
                 window.location.href = '/dashboard';
             } else if (role === 'consumer') {
                 window.location.href = '/onboarding';
@@ -110,13 +110,13 @@ export const Signup: React.FC = () => {
                     </button>
                     <button
                         type="button"
-                        onClick={() => setRole('grocery')}
+                        onClick={() => setRole('stores')}
                         style={{
                             padding: '0.75rem 1.5rem',
                             borderRadius: '0.5rem',
-                            border: role === 'grocery' ? '2px solid var(--primary)' : '1px solid #E5E7EB',
-                            background: role === 'grocery' ? '#ECFDF5' : 'white',
-                            color: role === 'grocery' ? 'var(--primary)' : 'var(--text-muted)',
+                            border: role === 'stores' ? '2px solid var(--primary)' : '1px solid #E5E7EB',
+                            background: role === 'stores' ? '#ECFDF5' : 'white',
+                            color: role === 'stores' ? 'var(--primary)' : 'var(--text-muted)',
                             fontWeight: 500,
                             cursor: 'pointer',
                             display: 'flex',
@@ -125,7 +125,7 @@ export const Signup: React.FC = () => {
                             transition: 'all 0.2s'
                         }}
                     >
-                        Grocery Store
+                        Stores
                     </button>
                     <button
                         type="button"
@@ -331,8 +331,8 @@ export const Signup: React.FC = () => {
                         </>
                     )}
 
-                    {/* Grocery Store Form */}
-                    {role === 'grocery' && (
+                    {/* Stores Form */}
+                    {role === 'stores' && (
                         <>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>Store Name</label>

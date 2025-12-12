@@ -2,7 +2,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'consumer' | 'restaurant' | 'grocery' | 'ngo' | 'admin' | 'seller' | 'customer';
+  role: 'consumer' | 'restaurant' | 'stores' | 'ngo' | 'admin' | 'seller' | 'customer';
   location: {
     lat: number;
     lng: number;

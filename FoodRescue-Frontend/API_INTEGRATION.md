@@ -59,7 +59,7 @@ const filteredFoods = await foodService.getAllFoods({
 // Get nearby foods
 const nearbyFoods = await foodService.getNearbyFoods(6.5244, 3.3792, 5);
 
-// Create food (restaurant/grocery)
+// Create food (restaurant/stores)
 const newFood = await foodService.createFood({
     name: 'Jollof Rice',
     description: 'Delicious Nigerian jollof',

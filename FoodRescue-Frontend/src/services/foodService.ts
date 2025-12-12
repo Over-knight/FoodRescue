@@ -82,7 +82,7 @@ export const foodService = {
         return transformProductToFood(response.data);
     },
 
-    // Create new food (for restaurants/grocery stores)
+    // Create new food (for restaurants/stores)
     async createFood(foodData: Partial<Food>): Promise<Food> {
         return apiClient.post<Food>('/products', foodData);
     },

@@ -26,9 +26,9 @@ export const Login: React.FC = () => {
         }
     };
 
-    const handleDemoLogin = (role: 'consumer' | 'restaurant' | 'grocery' | 'ngo' | 'admin') => {
+    const handleDemoLogin = (role: 'consumer' | 'restaurant' | 'stores' | 'ngo' | 'admin') => {
         login(role);
-        if (role === 'restaurant' || role === 'grocery') {
+        if (role === 'restaurant' || role === 'stores') {
             navigate('/dashboard');
         } else if (role === 'admin') {
             navigate('/admin');
@@ -258,7 +258,7 @@ export const Login: React.FC = () => {
                                 {[
                                     { role: 'consumer', label: 'Consumer' },
                                     { role: 'restaurant', label: 'Restaurant' },
-                                    { role: 'grocery', label: 'Grocery' },
+                                    { role: 'stores', label: 'Stores' },
                                     { role: 'ngo', label: 'NGO' },
                                     { role: 'admin', label: 'Admin' }
                                 ].map(({ role, label }) => (
@@ -335,7 +335,7 @@ export const Login: React.FC = () => {
                         opacity: 0.95,
                         lineHeight: 1.6
                     }}>
-                        Join thousands of food heroes rescuing delicious meals from top restaurants and grocery stores at up to 50% off. Save money while making a difference.
+                        Join thousands of food heroes rescuing delicious meals from top restaurants and stores at up to 50% off. Save money while making a difference.
                     </p>
 
                     {/* Stats */}

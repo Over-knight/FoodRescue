@@ -6,7 +6,7 @@ const FOOD_CATEGORIES = [
     // Restaurant meals
     'Rice', 'Pastries', 'Fast Food', 'Local',
     'Soups', 'Grills', 'Vegetarian', 'Seafood',
-    // Grocery items
+    // Stores items
     'Fresh Produce', 'Dairy', 'Bread & Bakery', 'Packaged Goods'
 ];
 

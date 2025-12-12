@@ -5,7 +5,7 @@ import { authService } from '../services/authService';
 
 interface AuthContextType {
     user: User | null;
-    login: (role: 'consumer' | 'restaurant' | 'grocery' | 'ngo' | 'admin') => void;
+    login: (role: 'consumer' | 'restaurant' | 'stores' | 'ngo' | 'admin') => void;
     loginWithCredentials: (email: string, password: string) => Promise<void>;
     logout: () => void;
     loading: boolean;
@@ -35,7 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     // Demo login (for quick testing)
-    const login = (role: 'consumer' | 'restaurant' | 'grocery' | 'ngo' | 'admin') => {
+    const login = (role: 'consumer' | 'restaurant' | 'stores' | 'ngo' | 'admin') => {
         const mockUser = MOCK_USERS.find(u => u.role === role);
         if (mockUser) {
             setUser(mockUser);

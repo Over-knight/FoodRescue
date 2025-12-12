@@ -168,12 +168,12 @@ export const RestaurantDashboard: React.FC = () => {
         setProducts(products.filter(p => p._id !== productId));
     };
 
-    if (!user || !['seller', 'restaurant', 'grocery', 'ngo'].includes(user.role)) {
-        return <div>Access Denied. Please login as a restaurant, grocery store, or NGO.</div>;
+    if (!user || !['seller', 'restaurant', 'stores', 'ngo'].includes(user.role)) {
+        return <div>Access Denied. Please login as a restaurant, store, or NGO.</div>;
     }
 
     return (
-        <div>
+        <div className="container" style={{ padding: '2rem 1rem' }}>
             <h1 style={{ marginBottom: '2rem' }}>Restaurant Dashboard</h1>
 
             {/* Verification Banner */}
@@ -208,11 +208,17 @@ export const RestaurantDashboard: React.FC = () => {
                 </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr',
+                gap: '2rem'
+            }}>
 
                 {/* Post Food Form */}
                 <div>
-                    <div className="card" style={{ padding: '2rem' }}>
+                    <div className="card" style={{
+                        padding: window.innerWidth <= 768 ? '1.5rem' : '2rem'
+                    }}>
                         <h2 style={{ marginBottom: '1.5rem' }}>Post New Food</h2>
                         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div>

@@ -51,7 +51,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                             Browse
                         </Link>
 
-                        {(user?.role === 'restaurant' || user?.role === 'seller' || user?.role === 'grocery' || user?.role === 'ngo') && (
+                        {(user?.role === 'restaurant' || user?.role === 'seller' || user?.role === 'stores' || user?.role === 'ngo') && (
                             <>
                                 <Link
                                     to="/dashboard"

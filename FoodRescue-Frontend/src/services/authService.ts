@@ -9,7 +9,7 @@ export interface SignupData {
     name: string;
     email: string;
     password: string;
-    role: 'consumer' | 'restaurant' | 'grocery' | 'ngo';
+    role: 'consumer' | 'restaurant' | 'stores' | 'ngo';
     phone?: string;
     location?: {
         address: string;

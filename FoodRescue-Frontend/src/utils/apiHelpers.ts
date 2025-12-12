@@ -68,12 +68,12 @@ export const extractErrorMessage = (error: any): string => {
  * Map frontend roles to backend roles
  */
 export const mapRoleToBackend = (
-  frontendRole: 'consumer' | 'restaurant' | 'grocery' | 'ngo' | 'admin'
+  frontendRole: 'consumer' | 'restaurant' | 'stores' | 'ngo' | 'admin'
 ): 'customer' | 'seller' | 'admin' => {
   const roleMap: Record<string, 'customer' | 'seller' | 'admin'> = {
     'consumer': 'customer',
     'restaurant': 'seller',
-    'grocery': 'seller',
+    'stores': 'seller',
     'ngo': 'seller',
     'admin': 'admin'
   };
@@ -97,10 +97,10 @@ export const mapRoleToFrontend = (
 };
 
 /**
- * Check if user has seller role (restaurant, grocery, ngo)
+ * Check if user has seller role (restaurant, stores, ngo)
  */
 export const isSellerRole = (role: string): boolean => {
-  return ['restaurant', 'grocery', 'ngo', 'seller'].includes(role);
+  return ['restaurant', 'stores', 'ngo', 'seller'].includes(role);
 };
 
 /**

@@ -41,7 +41,7 @@ export const MOCK_USERS: User[] = [
     id: 'u5',
     name: 'ShopRite Lekki',
     email: 'shoprite@example.com',
-    role: 'grocery',
+    role: 'stores',
     location: { lat: 6.4474, lng: 3.4700, address: 'Lekki, Lagos' },
     preferences: [],
     budget: 0,
@@ -120,7 +120,7 @@ export const MOCK_FOODS: Food[] = [
     tags: ['Chicken', 'Crispy'],
     status: 'active',
   },
-  // Grocery Store Items (ShopRite Lekki)
+  // Store Items (ShopRite Lekki)
   {
     id: 'g1',
     restaurantId: 'u5', // ShopRite Lekki
