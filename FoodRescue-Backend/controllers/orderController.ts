@@ -75,7 +75,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     let totalAmount = 0;
 
     for (const item of items) {
-      const product = products.find(p => p._id.toString() === item.productId);
+      const product = products.find(p => String(p._id) === item.productId);
       if (!product) continue;
 
       const quantity = item.quantity;
