@@ -121,4 +121,28 @@ export const Icons = {
             <path d="m6 6 12 12" />
         </svg>
     ),
+
+    MessageCircle: ({ size = 20, color = 'currentColor', className = '' }: IconProps) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+        </svg>
+    ),
+
+    Bot: ({ size = 20, color = 'currentColor', className = '' }: IconProps) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M12 8V4H8" />
+            <rect width="16" height="12" x="4" y="8" rx="2" />
+            <path d="M2 14h2" />
+            <path d="M20 14h2" />
+            <path d="M15 13v2" />
+            <path d="M9 13v2" />
+        </svg>
+    ),
+
+    Send: ({ size = 20, color = 'currentColor', className = '' }: IconProps) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="m22 2-7 20-4-9-9-4Z" />
+            <path d="M22 2 11 13" />
+        </svg>
+    ),
 };

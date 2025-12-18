@@ -173,4 +173,74 @@ export const aiService = {
 
         return { discountPercent, suggestedPrice };
     },
+
+    // ========== GEMINI AI ENDPOINTS ==========
+
+    /**
+     * Chat with Gemini AI Assistant
+     */
+    async chat(message: string, location?: { lat: number; lng: number }): Promise<{ success: boolean; data: { message: string } }> {
+        return apiClient.post('/ai/chat', { message, location });
+    },
+
+    /**
+     * Get Gemini-powered personalized recommendations
+     */
+    async getGeminiRecommendations(limit: number = 5): Promise<{ success: boolean; data: { recommendations: Food[]; count: number } }> {
+        return apiClient.get(`/ai/gemini-recommendations?limit=${limit}`);
+    },
+
+    /**
+     * Smart product search with AI
+     */
+    async searchProducts(
+        query: string,
+        filters?: {
+            visibleTo?: 'consumer' | 'ngo' | 'both';
+            location?: { lat: number; lng: number; maxDistance?: number };
+        }
+    ): Promise<{ success: boolean; data: { products: Food[]; count: number } }> {
+        return apiClient.post('/ai/search', { query, filters });
+    },
+
+    /**
+     * Aggregate products for bulk queries (NGO feature)
+     */
+    async aggregateProducts(
+        query: string,
+        location?: { lat: number; lng: number }
+    ): Promise<{
+        success: boolean;
+        data: {
+            query: string;
+            requestedQuantity: number;
+            totalAvailable: number;
+            canFulfill: boolean;
+            restaurantsCount: number;
+            breakdown: Array<{
+                restaurantName: string;
+                productName: string;
+                available: number;
+                unit: string;
+                price: number;
+                distance: string;
+                productId: string;
+            }>;
+        };
+    }> {
+        return apiClient.post('/ai/aggregate', { query, location });
+    },
+
+    /**
+     * Get welcome recommendations (works with or without auth)
+     */
+    async getWelcomeRecommendations(): Promise<{
+        success: boolean;
+        data: {
+            message: string;
+            recommendations: Food[];
+        };
+    }> {
+        return apiClient.get('/ai/welcome');
+    },
 };

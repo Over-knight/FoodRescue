@@ -151,4 +151,5 @@ UserSchema.index({ createdAt: -1 });
 UserSchema.index({ 'profile.location': '2dsphere' }); // Geospatial index for location queries
 
 const User = mongoose.model<IUser>("User", UserSchema);
+export { User };
 export default User;

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Icons } from './Icons';
+import { ChatWidget } from './ChatWidget';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const location = useLocation();
@@ -121,6 +122,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     <p>© 2025 FoodRescue Lagos. Fighting hunger, reducing waste.</p>
                 </div>
             </footer>
+            
+            {/* AI Chat Widget */}
+            <ChatWidget />
         </div>
     );
 };
