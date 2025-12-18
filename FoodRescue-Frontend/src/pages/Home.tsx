@@ -4,6 +4,7 @@ import { Food } from '../types';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Icons } from '../components/Icons';
+import { aiService } from '../services/aiApiService';
 
 // Helper: Calculate time remaining until expiry
 const getTimeRemaining = (expiryTime: string) => {
@@ -36,6 +37,8 @@ export const Home: React.FC = () => {
     const [filter, setFilter] = useState<'all' | 'meals' | 'groceries'>('all');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [recommendations, setRecommendations] = useState<Food[]>([]);
+    const [loadingRecommendations, setLoadingRecommendations] = useState(false);
     const { user } = useAuth();
 
     useEffect(() => {
@@ -55,6 +58,24 @@ export const Home: React.FC = () => {
 
         fetchFoods();
     }, []);
+
+    useEffect(() => {
+        const fetchRecommendations = async () => {
+            if (!user) return;
+            
+            try {
+                setLoadingRecommendations(true);
+                const response = await aiService.getGeminiRecommendations(4);
+                setRecommendations(response.data.recommendations);
+            } catch (err) {
+                console.error('Failed to fetch recommendations:', err);
+            } finally {
+                setLoadingRecommendations(false);
+            }
+        };
+
+        fetchRecommendations();
+    }, [user]);
 
     return (
         <div>
@@ -128,6 +149,82 @@ export const Home: React.FC = () => {
                 </button>
             </div>
 
+            {/* AI Recommendations Section */}
+            {user && recommendations.length > 0 && (
+                <div style={{ marginBottom: '2rem' }}>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        marginBottom: '1rem'
+                    }}>
+                        <Icons.Sparkles size={24} color="var(--primary)" />
+                        <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Recommended For You</h2>
+                    </div>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+                        Based on your order history and preferences
+                    </p>
+                    <div style={{
+                        display: 'flex',
+                        gap: '1rem',
+                        overflowX: 'auto',
+                        paddingBottom: '1rem',
+                        scrollbarWidth: 'thin'
+                    }}>
+                        {recommendations.map(food => (
+                            <Link
+                                key={food.id}
+                                to={`/checkout/${food.id}`}
+                                style={{
+                                    minWidth: '250px',
+                                    maxWidth: '250px',
+                                    textDecoration: 'none',
+                                    color: 'inherit'
+                                }}
+                            >
+                                <div className="card" style={{
+                                    overflow: 'hidden',
+                                    height: '100%',
+                                    transition: 'transform 0.2s',
+                                    cursor: 'pointer'
+                                }}>
+                                    <div style={{ position: 'relative', height: '150px', overflow: 'hidden' }}>
+                                        <img
+                                            src={food.image || 'https://via.placeholder.com/250x150?text=No+Image'}
+                                            alt={food.name}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        />
+                                        {food.discountPercent > 0 && (
+                                            <span style={{
+                                                position: 'absolute',
+                                                top: '0.5rem',
+                                                right: '0.5rem',
+                                                background: '#FF6B35',
+                                                color: 'white',
+                                                fontSize: '0.75rem',
+                                                fontWeight: 'bold',
+                                                padding: '0.3rem 0.6rem',
+                                                borderRadius: '0.4rem'
+                                            }}>
+                                                -{food.discountPercent}%
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div style={{ padding: '1rem' }}>
+                                        <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', fontWeight: 600 }}>
+                                            {food.name}
+                                        </h3>
+                                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+                                            ₦{food.discountedPrice?.toLocaleString() || 0}
+                                        </div>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Top Picks Banner */}
             <div style={{
                 background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
@@ -136,7 +233,9 @@ export const Home: React.FC = () => {
                 marginBottom: '2rem',
                 color: 'white'
             }}>
-                <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem' }}>Top Picks For You</h2>
+                <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.5rem' }}>
+                    {user && recommendations.length > 0 ? 'More Deals' : 'Top Picks For You'}
+                </h2>
                 <p style={{ margin: 0, opacity: 0.9 }}>Fresh deals from local vendors</p>
             </div>
 

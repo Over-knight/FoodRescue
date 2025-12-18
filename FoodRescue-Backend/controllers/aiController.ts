@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import Product from '../models/product';
-import Order from '../models/order';
+import { Product } from '../models/product';
+import { Order } from '../models/order';
+import geminiService from '../services/geminiService';
 
 // Smart Food Matching Algorithm
 export const matchFoods = async (req: Request, res: Response) => {
@@ -21,7 +22,7 @@ export const matchFoods = async (req: Request, res: Response) => {
         }).populate('vendorId', 'name location');
 
         // Calculate match score for each product
-        const matches = products.map(product => {
+        const matches = products.map((product: any) => {
             const scores = calculateMatchScore(product, preferences, budget, location);
             
             return {
@@ -38,7 +39,7 @@ export const matchFoods = async (req: Request, res: Response) => {
         });
 
         // Sort by match score (highest first)
-        matches.sort((a, b) => b.matchScore - a.matchScore);
+        matches.sort((a: any, b: any) => b.matchScore - a.matchScore);
 
         res.json({
             matches: matches.slice(0, 20), // Return top 20 matches
@@ -72,7 +73,7 @@ export const getRecommendations = async (req: Request, res: Response) => {
             .limit(10);
 
             return res.json({
-                recommendations: popularProducts.map(p => ({
+                recommendations: popularProducts.map((p: any) => ({
                     food: p,
                     reason: 'Popular item in your area',
                     confidence: 0.6
@@ -89,7 +90,7 @@ export const getRecommendations = async (req: Request, res: Response) => {
         const categoryCount: { [key: string]: number } = {};
         let totalSpent = 0;
 
-        orders.forEach(order => {
+        orders.forEach((order: any) => {
             const product = order.productId as any;
             if (product && product.category) {
                 categoryCount[product.category] = (categoryCount[product.category] || 0) + 1;
@@ -114,7 +115,7 @@ export const getRecommendations = async (req: Request, res: Response) => {
         })
         .limit(10);
 
-        const recommendations = recommendedProducts.map(product => {
+        const recommendations = recommendedProducts.map((product: any) => {
             const inFavoriteCategory = favoriteCategories.includes(product.category);
             const withinBudget = product.discountedPrice <= averageSpending;
             
@@ -348,3 +349,190 @@ function generateReasoning(scores: any, product: any): string {
 
     return reasons.join('. ') || 'Recommended for you';
 }
+
+// ========== GEMINI AI INTEGRATION ==========
+
+/**
+ * Chat with AI assistant
+ * POST /api/ai/chat
+ * Body: { message: string, location?: { lat: number, lng: number } }
+ */
+export const chatWithAI = async (req: Request, res: Response) => {
+  try {
+    const { message, location } = req.body;
+
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Message is required and must be a string'
+      });
+    }
+
+    // Get user ID from authenticated request
+    const userId = (req as any).user?.id;
+
+    const response = await geminiService.chat(message, userId, location);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        message: response
+      }
+    });
+  } catch (error: any) {
+    console.error('Chat error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to process your message'
+    });
+  }
+};
+
+/**
+ * Get personalized Gemini-powered recommendations
+ * GET /api/ai/gemini-recommendations
+ * Query: ?limit=5
+ */
+export const getGeminiRecommendations = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    const limit = parseInt(req.query.limit as string) || 5;
+
+    const recommendations = await geminiService.getRecommendations(userId, limit);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        recommendations,
+        count: recommendations.length
+      }
+    });
+  } catch (error: any) {
+    console.error('Recommendations error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to get recommendations'
+    });
+  }
+};
+
+/**
+ * Smart product search with AI
+ * POST /api/ai/search
+ * Body: { query: string, filters?: { visibleTo?: string, location?: { lat, lng, maxDistance } } }
+ */
+export const searchProducts = async (req: Request, res: Response) => {
+  try {
+    const { query, filters } = req.body;
+
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Search query is required'
+      });
+    }
+
+    const products = await geminiService.searchProducts(query, filters);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        products,
+        count: products.length
+      }
+    });
+  } catch (error: any) {
+    console.error('Search error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to search products'
+    });
+  }
+};
+
+/**
+ * Aggregate products for bulk queries
+ * POST /api/ai/aggregate
+ * Body: { query: string, location?: { lat: number, lng: number } }
+ * Example query: "I need 50 spaghetti servings"
+ */
+export const aggregateProducts = async (req: Request, res: Response) => {
+  try {
+    const { query, location } = req.body;
+
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Query is required'
+      });
+    }
+
+    const result = await geminiService.aggregateProducts(query, location);
+
+    res.status(200).json({
+      success: true,
+      data: result
+    });
+  } catch (error: any) {
+    console.error('Aggregate error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to aggregate products'
+    });
+  }
+};
+
+/**
+ * Get personalized welcome/onboarding recommendations
+ * GET /api/ai/welcome
+ */
+export const getWelcomeRecommendations = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+      // For non-authenticated users, return popular products
+      const popularProducts = await Product.find({
+        status: 'active',
+        'inventory.availableStock': { $gt: 0 }
+      })
+        .sort({ 'stats.orderCount': -1 })
+        .limit(8)
+        .populate('category')
+        .populate('restaurant', 'firstName lastName');
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          message: 'Welcome to FoodRescue! Here are some popular items:',
+          recommendations: popularProducts
+        }
+      });
+    }
+
+    // For authenticated users, get personalized recommendations
+    const recommendations = await geminiService.getRecommendations(userId, 8);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        message: 'Welcome back! Based on your preferences, we recommend:',
+        recommendations
+      }
+    });
+  } catch (error: any) {
+    console.error('Welcome recommendations error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to get welcome recommendations'
+    });
+  }
+};

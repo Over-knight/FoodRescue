@@ -14,6 +14,25 @@ export interface LocationData {
   country?: string;
 }
 
+// Google Maps API response types
+interface GoogleMapsGeocodeResponse {
+  status: string;
+  results: Array<{
+    formatted_address: string;
+    geometry: {
+      location: {
+        lat: number;
+        lng: number;
+      };
+    };
+    address_components: Array<{
+      long_name: string;
+      short_name: string;
+      types: string[];
+    }>;
+  }>;
+}
+
 /**
  * Geocode an address to get coordinates using Google Maps Geocoding API
  */
@@ -23,7 +42,7 @@ export const geocodeAddress = async (address: string): Promise<LocationData> => 
   }
 
   try {
-    const response = await axios.get(
+    const response = await axios.get<GoogleMapsGeocodeResponse>(
       'https://maps.googleapis.com/maps/api/geocode/json',
       {
         params: {

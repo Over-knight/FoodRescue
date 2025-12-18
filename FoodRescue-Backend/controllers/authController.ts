@@ -45,7 +45,7 @@ export const login = async (
     const token = generateToken(String(user._id), user.role);
 
     // Remove password from response
-    const { password: _, ...userResponse } = user.toObject();
+    const { password: _pwd, ...userResponse } = user.toObject();
 
     return res.json({
       success: true,
@@ -160,9 +160,8 @@ export const directSignup = async (
     // Generate token
     const token = generateToken(String(newUser._id), newUser.role);
 
-    // Remove password from response
-    const userResponse = newUser.toObject();
-    delete userResponse.password;
+    // Remove password from response using destructuring
+    const { password: _pass, ...userResponse } = newUser.toObject();
 
     return res.status(201).json({
       success: true,
